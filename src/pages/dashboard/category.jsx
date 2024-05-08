@@ -23,6 +23,8 @@ export function Category() {
             .catch((err) => console.log(err));
     }, []);
 
+    // Handle create/edit/delete catogory
+
     const handleActiveCate = (e, id) => {
         toast.promise(
             apiRequest.patch(

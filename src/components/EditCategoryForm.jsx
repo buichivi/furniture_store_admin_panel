@@ -11,6 +11,8 @@ const EditCategoryForm = ({ category = {}, index = {}, setCategories = () => {} 
     const { _id, name, imageUrl, description } = category;
     const token = localStorage.getItem('token');
 
+    // Handle edit category
+
     const editCateForm = useFormik({
         initialValues: {
             name: name,
