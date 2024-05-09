@@ -6,8 +6,9 @@ import {
     ServerStackIcon,
     RectangleStackIcon,
     ShoppingCartIcon,
+    SparklesIcon,
 } from '@heroicons/react/24/solid';
-import { Home, Profile, Tables, Notifications, Product, Category } from '@/pages/dashboard';
+import { Home, Profile, Tables, Notifications, Product, Category, Brand } from '@/pages/dashboard';
 import { SignIn, SignUp } from '@/pages/auth';
 
 const icon = {
@@ -29,6 +30,12 @@ export const routes = [
                 name: 'category',
                 path: '/category',
                 element: <Category />,
+            },
+            {
+                icon: <SparklesIcon {...icon} />,
+                name: 'brand',
+                path: '/brand',
+                element: <Brand />,
             },
             {
                 icon: <ShoppingCartIcon {...icon} />,

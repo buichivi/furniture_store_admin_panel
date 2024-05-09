@@ -1,34 +1,29 @@
+import { EditBrandForm } from '@/components';
 import apiRequest from '@/utils/apiRequest';
 import textShort from '@/utils/textShort';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
-import { Button, Card, IconButton, Input, Switch, Textarea, Tooltip, Typography } from '@material-tailwind/react';
-import { useEffect, useRef, useState } from 'react';
+import { Button, Card, IconButton, Switch, Tooltip, Typography } from '@material-tailwind/react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { EditCategoryForm } from '@/components';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { InboxIcon } from '@heroicons/react/24/solid';
-const TABLE_HEAD = ['#', 'Name', 'Image', 'Description', 'Active', 'Action'];
 
-export function Category() {
-    const [categories, setCategories] = useState([]);
-    const previewCateImage = useRef();
+const TABLE_HEAD = ['Name', 'Description', 'Created at', 'Active', 'Action'];
+
+export function Brand() {
+    const [brands, setBrands] = useState([]);
     const token = localStorage.getItem('token');
     useEffect(() => {
         apiRequest
-            .get('/categories')
-            .then((res) => {
-                setCategories(res.data.categories);
-            })
+            .get('/brands')
+            .then((res) => setBrands(res.data.brands))
             .catch((err) => console.log(err));
     }, []);
 
-    // Handle create/edit/delete catogory
-
-    const handleActiveCate = (e, id) => {
+    const handleChangeActiveBrand = (e, id) => {
         toast.promise(
             apiRequest.patch(
-                '/categories/' + id,
+                '/brands/' + id,
                 { active: e.target.checked },
                 { headers: { Authorization: 'Bearer ' + token } },
             ),
@@ -44,13 +39,13 @@ export function Category() {
         );
     };
 
-    const handleDeleteCate = (id) => {
-        toast.promise(apiRequest.delete('/categories/' + id, { headers: { Authorization: 'Bearer ' + token } }), {
+    const handleDeleteBrand = (id) => {
+        toast.promise(apiRequest.delete('/brands/' + id, { headers: { Authorization: 'Bearer ' + token } }), {
             loading: 'Deleting...',
             success: (res) => {
-                setCategories((categories) => {
-                    const newCategories = categories.filter((cate) => cate._id !== id);
-                    return newCategories;
+                setBrands((brands) => {
+                    const newBrands = brands.filter((brand) => brand._id !== id);
+                    return newBrands;
                 });
                 return res.data?.message;
             },
@@ -61,42 +56,31 @@ export function Category() {
         });
     };
 
-    const addCateForm = useFormik({
+    const addBrandForm = useFormik({
         initialValues: {
             name: '',
             description: '',
-            imageUrl: '',
         },
         validationSchema: Yup.object({
             name: Yup.string().required('This field is required'),
             description: Yup.string().required('This field is required'),
-            imageUrl: Yup.mixed().required('This field is required'),
         }),
         onSubmit: (values, { resetForm }) => {
-            const formData = new FormData();
-            for (const key in values) {
-                console.log(key);
-                formData.append(key, values[key]);
-            }
-            toast.promise(
-                apiRequest.post('/categories/', formData, { headers: { Authorization: 'Bearer ' + token } }),
-                {
-                    loading: 'Creating...',
-                    success: (res) => {
-                        setCategories((categories) => {
-                            const newCategories = [...categories, res.data.category];
-                            return newCategories;
-                        });
-                        resetForm();
-                        previewCateImage.current.src = 'https://placehold.co/600x400?text=Select%20image';
-                        return res.data.message;
-                    },
-                    error: (err) => {
-                        console.log(err);
-                        return err.response.data.error || 'Something went wrong';
-                    },
+            toast.promise(apiRequest.post('/brands/', values, { headers: { Authorization: 'Bearer ' + token } }), {
+                loading: 'Creating...',
+                success: (res) => {
+                    setBrands((brands) => {
+                        const newBrands = [...brands, res.data.brand];
+                        return newBrands;
+                    });
+                    resetForm();
+                    return res.data.message;
                 },
-            );
+                error: (err) => {
+                    console.log(err);
+                    return err.response.data.error || 'Something went wrong';
+                },
+            });
         },
     });
 
@@ -109,28 +93,28 @@ export function Category() {
                     e.currentTarget.nextElementSibling.checked = !e.currentTarget.nextElementSibling.checked;
                 }}
             >
-                Add category
+                Add brand
             </Button>
-            <input type="checkbox" id="add-cate" className="hidden [&:checked+div]:flex" />
+            <input type="checkbox" id="add-brand" className="hidden [&:checked+div]:flex" />
             <div className="fixed left-0 top-0 z-50 hidden size-full items-center justify-center">
-                <label htmlFor="add-cate" className="absolute left-0 top-0 size-full bg-[#000b]"></label>
+                <label htmlFor="add-brand" className="absolute left-0 top-0 size-full bg-[#000b]"></label>
                 <Card className="absolute left-1/2 top-1/2 h-auto w-2/3 -translate-x-1/2 -translate-y-1/2 p-4">
-                    <h3 className="font-semibold capitalize">Add category</h3>
-                    <form onSubmit={addCateForm.handleSubmit} className="mt-6">
+                    <h3 className="font-semibold capitalize">Add brand</h3>
+                    <form onSubmit={addBrandForm.handleSubmit} className="mt-6">
                         <label className="block">
                             <div className="flex items-center justify-between">
                                 <span className="text-sm">Name</span>
-                                {addCateForm.errors.name && (
+                                {addBrandForm.errors.name && (
                                     <Typography className="text-sm" color="red">
-                                        {addCateForm.errors.name}
+                                        {addBrandForm.errors.name}
                                     </Typography>
                                 )}
                             </div>
                             <input
                                 name="name"
                                 type="text"
-                                value={addCateForm.values.name}
-                                onChange={addCateForm.handleChange}
+                                value={addBrandForm.values.name}
+                                onChange={addBrandForm.handleChange}
                                 placeholder="Category name"
                                 className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-colors focus:border-b-black"
                             />
@@ -138,9 +122,9 @@ export function Category() {
                         <label className="mt-4 block">
                             <div className="flex items-center justify-between">
                                 <span className="text-sm">Desciption</span>
-                                {addCateForm.errors.description && (
+                                {addBrandForm.errors.description && (
                                     <Typography className="text-sm" color="red">
-                                        {addCateForm.errors.description}
+                                        {addBrandForm.errors.description}
                                     </Typography>
                                 )}
                             </div>
@@ -148,49 +132,16 @@ export function Category() {
                                 name="description"
                                 spellCheck="false"
                                 placeholder="Category name"
-                                value={addCateForm.values.description}
-                                onChange={addCateForm.handleChange}
+                                value={addBrandForm.values.description}
+                                onChange={addBrandForm.handleChange}
                                 className="w-full resize-y border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-colors focus:border-b-black"
                                 rows={4}
                             ></textarea>
                         </label>
-                        <div className="mt-4">
-                            <span className="mb-2 block text-sm">Image</span>
-                            {addCateForm.errors.imageUrl && (
-                                <Typography className="text-sm" color="red">
-                                    {addCateForm.errors.imageUrl}
-                                </Typography>
-                            )}
-                            <div className="relative w-fit [&:hover_label]:opacity-100">
-                                <img
-                                    ref={previewCateImage}
-                                    src="https://placehold.co/600x400?text=Select%20image"
-                                    alt=""
-                                    className="size-28 object-cover"
-                                />
-                                <label
-                                    htmlFor="add-cate-image"
-                                    className="absolute left-0 top-0 z-50 flex size-full cursor-pointer items-center justify-center bg-[#000000ab] opacity-0 transition-all"
-                                >
-                                    <span className="mr-1 text-sm text-white">Select image</span>
-                                    <PencilIcon className="size-4" color="white" />
-                                </label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    id="add-cate-image"
-                                    onChange={(e) => {
-                                        addCateForm.setFieldValue('imageUrl', e.target.files[0]);
-                                        previewCateImage.current.src = URL.createObjectURL(e.currentTarget.files[0]);
-                                    }}
-                                    className="hidden"
-                                />
-                            </div>
-                        </div>
                         <div className="mt-6 flex items-center justify-center gap-4">
                             <Button
                                 color="cyan"
-                                variant="outlined"
+                                variant="filled"
                                 type="submit"
                                 onClick={(e) => {
                                     e.currentTarget.nextElementSibling.children[0].click();
@@ -198,10 +149,10 @@ export function Category() {
                             >
                                 Add
                             </Button>
-                            <Button color="red" className="relative">
+                            <Button color="red" className="relative" variant="outlined">
                                 <label
-                                    htmlFor="add-cate"
-                                    className="absolute left-0 top-0 size-full"
+                                    htmlFor="add-brand"
+                                    className="absolute left-0 top-0 size-full cursor-pointer"
                                     onClick={(e) => e.stopPropagation()}
                                 ></label>
                                 Close
@@ -211,7 +162,7 @@ export function Category() {
                 </Card>
             </div>
             <Card className="h-full w-full overflow-scroll">
-                <table className="w-full min-w-max table-fixed text-left">
+                <table className="w-full min-w-max table-auto text-left">
                     <thead>
                         <tr>
                             {TABLE_HEAD.map((head) => (
@@ -228,41 +179,27 @@ export function Category() {
                         </tr>
                     </thead>
                     <tbody>
-                        {categories.length === 0 && (
-                            <tr>
-                                <td colSpan={6}>
-                                    <div className="flex min-h-[50vh] items-center justify-center opacity-50">
-                                        <InboxIcon className="size-5 text-black" />
-                                        <span className="ml-2 text-sm">Empty</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        )}
-                        {categories?.map((category, index) => {
-                            const { _id, name, imageUrl, description, active } = category;
+                        {brands.map((brand, index) => {
+                            const { _id, name, description, createdAt, active } = brand;
                             return (
                                 <tr key={name} className="even:bg-blue-gray-50/50">
-                                    <td className="p-4">
-                                        <Typography variant="small" color="blue-gray" className="font-normal">
-                                            {index + 1}
-                                        </Typography>
-                                    </td>
                                     <td className="p-4">
                                         <Typography variant="small" color="blue-gray" className="font-normal">
                                             {name}
                                         </Typography>
                                     </td>
                                     <td className="p-4">
-                                        <img src={imageUrl} alt="" className="w-32 object-contain" />
-                                    </td>
-
-                                    <td className="p-4">
                                         <Typography
                                             variant="small"
                                             color="blue-gray"
-                                            className="line-clamp-1 text-ellipsis font-normal"
+                                            className="text-ellipsis font-normal"
                                         >
                                             {textShort(description)}
+                                        </Typography>
+                                    </td>
+                                    <td className="p-4">
+                                        <Typography variant="small" color="blue-gray" className="font-normal">
+                                            {createdAt}
                                         </Typography>
                                     </td>
                                     <td className="p-4">
@@ -270,7 +207,7 @@ export function Category() {
                                             color="green"
                                             defaultChecked={active}
                                             value={active}
-                                            onChange={(e) => handleActiveCate(e, _id)}
+                                            onChange={(e) => handleChangeActiveBrand(e, _id)}
                                         />
                                     </td>
                                     <td className="p-4">
@@ -289,18 +226,14 @@ export function Category() {
                                         <input
                                             type="checkbox"
                                             className="hidden [&:checked+div]:block"
-                                            id={`edit-cate-${index}`}
+                                            id={`edit-brand-${index}`}
                                         />
                                         <div className="fixed left-0 top-0 z-50 hidden h-full w-full">
                                             <label
-                                                htmlFor={`edit-cate-${index}`}
+                                                htmlFor={`edit-brand-${index}`}
                                                 className="block h-full w-full bg-[#000000a1]"
                                             ></label>
-                                            <EditCategoryForm
-                                                category={category}
-                                                index={index}
-                                                setCategories={setCategories}
-                                            />
+                                            <EditBrandForm brand={brand} index={index} setBrands={setBrands} />
                                         </div>
                                         <span
                                             onClick={(e) => {
@@ -308,7 +241,7 @@ export function Category() {
                                                 inputDelete.checked = !inputDelete.checked;
                                             }}
                                         >
-                                            <Tooltip content="Delete Category">
+                                            <Tooltip content="Delete Brand">
                                                 <IconButton variant="text" className="ml-2 hover:text-red-600">
                                                     <TrashIcon className="h-4 w-4 " />
                                                 </IconButton>
@@ -316,19 +249,18 @@ export function Category() {
                                         </span>
                                         <input
                                             type="checkbox"
-                                            id={`delete-cate-${index}`}
+                                            id={`delete-brand-${index}`}
                                             className="hidden [&:checked+div]:flex"
-                                            onChange={(e) => console.log(e.target.checked)}
                                         />
                                         <div className="fixed left-0 top-0 z-50 hidden h-full w-full items-center justify-center">
                                             <label
-                                                htmlFor={`delete-cate-${index}`}
+                                                htmlFor={`delete-brand-${index}`}
                                                 className="absolute left-0 top-0 h-full w-full bg-[#000000a1]"
                                             ></label>
                                             <Card className="h-auto min-w-[50%] px-4 py-6">
                                                 <h3 className="text-left font-semibold">Confirm Delete</h3>
                                                 <p className="mt-2 text-sm">
-                                                    Are you sure you want to delete the category named "
+                                                    Are you sure you want to delete the brand named "
                                                     <span className="font-bold">{name}</span>"?
                                                 </p>
                                                 <div className="mt-10 flex items-center justify-center gap-10">
@@ -336,14 +268,14 @@ export function Category() {
                                                         color="red"
                                                         onClick={(e) => {
                                                             e.currentTarget.nextElementSibling.children[0].click();
-                                                            handleDeleteCate(_id);
+                                                            handleDeleteBrand(_id);
                                                         }}
                                                     >
                                                         Delete
                                                     </Button>
                                                     <Button className="relative">
                                                         <label
-                                                            htmlFor={`delete-cate-${index}`}
+                                                            htmlFor={`delete-brand-${index}`}
                                                             className="absolute left-0 top-0 size-full cursor-pointer"
                                                         ></label>
                                                         Cancel
