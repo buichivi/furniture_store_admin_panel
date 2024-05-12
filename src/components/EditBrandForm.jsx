@@ -20,7 +20,7 @@ const EditBrandForm = ({ brand = {}, index = {}, setBrands = () => {} }) => {
             description: Yup.string().required('This field is required'),
         }),
         onSubmit: (values) => {
-            toast.promise(apiRequest.put('/brands/' + _id, values, { headers: { Authorization: 'Bearer ' + token } }), {
+            toast.promise(apiRequest.put('/brands/' + _id, values), {
                 loading: 'Updating...',
                 success: (res) => {
                     setBrands((brands) => {
@@ -38,7 +38,7 @@ const EditBrandForm = ({ brand = {}, index = {}, setBrands = () => {} }) => {
     });
     return (
         <Card className="absolute left-1/2 top-1/2 h-auto w-2/3 -translate-x-1/2 -translate-y-1/2 p-4">
-            <h3 className="font-semibold capitalize">Edit category</h3>
+            <h3 className="font-semibold capitalize">Edit brand</h3>
             <form onSubmit={editBrandForm.handleSubmit} className="mt-6">
                 <label className="block">
                     <span className="text-sm">Name</span>

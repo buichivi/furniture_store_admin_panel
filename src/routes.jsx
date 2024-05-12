@@ -7,9 +7,12 @@ import {
     RectangleStackIcon,
     ShoppingCartIcon,
     SparklesIcon,
+    InboxIcon,
 } from '@heroicons/react/24/solid';
 import { Home, Profile, Tables, Notifications, Product, Category, Brand } from '@/pages/dashboard';
 import { SignIn, SignUp } from '@/pages/auth';
+import { AddColor, AddProduct, EditCategoryForm, EditColor, EditProductForm } from './components';
+import { element } from 'prop-types';
 
 const icon = {
     className: 'w-5 h-5 text-inherit',
@@ -38,29 +41,29 @@ export const routes = [
                 element: <Brand />,
             },
             {
-                icon: <ShoppingCartIcon {...icon} />,
+                icon: <InboxIcon {...icon} />,
                 name: 'product',
                 path: '/product',
                 element: <Product />,
             },
-            {
-                icon: <UserCircleIcon {...icon} />,
-                name: 'profile',
-                path: '/profile',
-                element: <Profile />,
-            },
-            {
-                icon: <TableCellsIcon {...icon} />,
-                name: 'tables',
-                path: '/tables',
-                element: <Tables />,
-            },
-            {
-                icon: <InformationCircleIcon {...icon} />,
-                name: 'notifications',
-                path: '/notifications',
-                element: <Notifications />,
-            },
+            // {
+            //     icon: <UserCircleIcon {...icon} />,
+            //     name: 'profile',
+            //     path: '/profile',
+            //     element: <Profile />,
+            // },
+            // {
+            //     icon: <TableCellsIcon {...icon} />,
+            //     name: 'tables',
+            //     path: '/tables',
+            //     element: <Tables />,
+            // },
+            // {
+            //     icon: <InformationCircleIcon {...icon} />,
+            //     name: 'notifications',
+            //     path: '/notifications',
+            //     element: <Notifications />,
+            // },
         ],
     },
     {
@@ -73,14 +76,30 @@ export const routes = [
                 path: '/sign-in',
                 element: <SignIn />,
             },
-            {
-                icon: <RectangleStackIcon {...icon} />,
-                name: 'sign up',
-                path: '/sign-up',
-                element: <SignUp />,
-            },
         ],
+    },
+];
+const subRoutes = [
+    {
+        path: '/product/edit/:id',
+
+        element: <EditProductForm />,
+    },
+    {
+        path: '/product/create',
+
+        element: <AddProduct />,
+    },
+    {
+        path: '/product/edit/:id/add-color',
+
+        element: <AddColor />,
+    },
+    {
+        path: '/product/:productId/edit-color/:colorId',
+        element: <EditColor />,
     },
 ];
 
 export default routes;
+export { subRoutes };

@@ -8,7 +8,7 @@ import { EditCategoryForm } from '@/components';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { InboxIcon } from '@heroicons/react/24/solid';
-const TABLE_HEAD = ['#', 'Name', 'Image', 'Description', 'Active', 'Action'];
+const TABLE_HEAD = ['Name', 'Image', 'Description', 'Active', 'Action'];
 
 export function Category() {
     const [categories, setCategories] = useState([]);
@@ -103,7 +103,7 @@ export function Category() {
     return (
         <div className="py-6">
             <Button
-                color="blue"
+                variant="gradient"
                 className="mb-4"
                 onClick={(e) => {
                     e.currentTarget.nextElementSibling.checked = !e.currentTarget.nextElementSibling.checked;
@@ -244,16 +244,11 @@ export function Category() {
                                 <tr key={name} className="even:bg-blue-gray-50/50">
                                     <td className="p-4">
                                         <Typography variant="small" color="blue-gray" className="font-normal">
-                                            {index + 1}
-                                        </Typography>
-                                    </td>
-                                    <td className="p-4">
-                                        <Typography variant="small" color="blue-gray" className="font-normal">
                                             {name}
                                         </Typography>
                                     </td>
                                     <td className="p-4">
-                                        <img src={imageUrl} alt="" className="w-32 object-contain" />
+                                        <img src={imageUrl} alt="" className="w-24 object-contain" />
                                     </td>
 
                                     <td className="p-4">

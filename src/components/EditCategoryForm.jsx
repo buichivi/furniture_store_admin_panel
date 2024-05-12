@@ -9,7 +9,6 @@ import * as Yup from 'yup';
 const EditCategoryForm = ({ category = {}, index = {}, setCategories = () => {} }) => {
     const previewCateImage = useRef();
     const { _id, name, imageUrl, description } = category;
-    const token = localStorage.getItem('token');
 
     // Handle edit category
 
@@ -29,25 +28,20 @@ const EditCategoryForm = ({ category = {}, index = {}, setCategories = () => {} 
             for (const key in values) {
                 formData.append(key, values[key]);
             }
-            toast.promise(
-                apiRequest.put('/categories/' + _id, formData, { headers: { Authorization: 'Bearer ' + token } }),
-                {
-                    loading: 'Updating...',
-                    success: (res) => {
-                        setCategories((categories) => {
-                            const newCategories = categories.map((cate) =>
-                                cate._id === _id ? res.data.category : cate,
-                            );
-                            return newCategories;
-                        });
-                        return res.data.message;
-                    },
-                    error: (err) => {
-                        console.log(err);
-                        return err.response.data.error || 'Something went wrong';
-                    },
+            toast.promise(apiRequest.put('/categories/' + _id, formData), {
+                loading: 'Updating...',
+                success: (res) => {
+                    setCategories((categories) => {
+                        const newCategories = categories.map((cate) => (cate._id === _id ? res.data.category : cate));
+                        return newCategories;
+                    });
+                    return res.data.message;
                 },
-            );
+                error: (err) => {
+                    console.log(err);
+                    return err.response.data.error || 'Something went wrong';
+                },
+            });
         },
     });
     return (

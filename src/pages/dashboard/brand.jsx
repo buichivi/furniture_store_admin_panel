@@ -1,7 +1,7 @@
 import { EditBrandForm } from '@/components';
 import apiRequest from '@/utils/apiRequest';
 import textShort from '@/utils/textShort';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { InboxIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { Button, Card, IconButton, Switch, Tooltip, Typography } from '@material-tailwind/react';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -87,7 +87,7 @@ export function Brand() {
     return (
         <div className="py-6">
             <Button
-                color="blue"
+                variant="gradient"
                 className="mb-4"
                 onClick={(e) => {
                     e.currentTarget.nextElementSibling.checked = !e.currentTarget.nextElementSibling.checked;
@@ -179,6 +179,16 @@ export function Brand() {
                         </tr>
                     </thead>
                     <tbody>
+                        {brands.length === 0 && (
+                            <tr>
+                                <td colSpan={6}>
+                                    <div className="flex min-h-[50vh] items-center justify-center opacity-50">
+                                        <InboxIcon className="size-5 text-black" />
+                                        <span className="ml-2 text-sm">Empty</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        )}
                         {brands.map((brand, index) => {
                             const { _id, name, description, createdAt, active } = brand;
                             return (
