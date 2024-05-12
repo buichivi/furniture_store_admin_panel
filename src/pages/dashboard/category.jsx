@@ -230,7 +230,7 @@ export function Category() {
                     <tbody>
                         {categories.length === 0 && (
                             <tr>
-                                <td colSpan={6}>
+                                <td colSpan={TABLE_HEAD.length}>
                                     <div className="flex min-h-[50vh] items-center justify-center opacity-50">
                                         <InboxIcon className="size-5 text-black" />
                                         <span className="ml-2 text-sm">Empty</span>

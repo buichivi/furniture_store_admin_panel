@@ -87,7 +87,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
                     </>
                 ))}
             </div>
-            <span className="px-6">
+            <span className="mb-2 px-6">
                 <Button
                     className="flex items-center gap-2"
                     color="black"

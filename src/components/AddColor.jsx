@@ -9,9 +9,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 
 const AddColor = () => {
-    const [images, setImages] = useState([]);
-    const [imagesError, setImagesError] = useState('');
-    const { id } = useParams();
+    const { slug } = useParams();
     const navigate = useNavigate();
 
     const addColorForm = useFormik({
@@ -19,24 +17,29 @@ const AddColor = () => {
             name: '',
             thumb: '',
             stock: 0,
+            images: [],
         },
         validationSchema: Yup.object({
             name: Yup.string().required('This field is required'),
             thumb: Yup.mixed().required('This field is required'),
             stock: Yup.number().min(0).required('This field is required'),
+            images: Yup.array().min(1).required('This field is required'),
         }),
         onSubmit: (values) => {
             const formData = new FormData();
             for (const key in values) {
+                if (key == 'images') {
+                    for (const file of values.images) {
+                        formData.append('images', file);
+                    }
+                    continue;
+                }
                 formData.append(key, values[key]);
             }
-            for (const file of images) {
-                formData.append('images', file);
-            }
-            toast.promise(apiRequest.post('/colors/' + id, formData), {
+            toast.promise(apiRequest.post('/colors/' + slug, formData), {
                 loading: 'Creating...',
                 success: (res) => {
-                    navigate('/dashboard/product/edit/' + id);
+                    navigate('/dashboard/product/edit/' + slug);
                     return res.data.message;
                 },
                 error: (err) => {
@@ -53,7 +56,11 @@ const AddColor = () => {
                 key={src}
                 className="relative cursor-pointer [&:hover>span]:opacity-100"
                 onClick={() => {
-                    setImages((images) => images.filter((img, idx) => idx != index));
+                    addColorForm.setFieldValue(
+                        'images',
+                        addColorForm.values.images.filter((img, idx) => idx != index),
+                    );
+                    // setImages((images) => images.filter((img, idx) => idx != index));
                 }}
             >
                 <img src={src} alt="" className="size-full object-cover" />
@@ -68,7 +75,7 @@ const AddColor = () => {
     return (
         <div className="py-6">
             <div className="flex items-center gap-2">
-                <Link to={`/dashboard/product/edit/${id}`}>
+                <Link to={`/dashboard/product/edit/${slug}`}>
                     <Tooltip content="Back">
                         <IconButton>
                             <ArrowLeftIcon className="size-4" />
@@ -151,13 +158,13 @@ const AddColor = () => {
                     <Card className="flex-1 p-4">
                         <div className="flex items-center justify-between">
                             <span className="block text-sm font-medium">Images</span>
-                            {imagesError && images.length == 0 && (
-                                <span className="text-sm text-red-500">{imagesError}</span>
+                            {addColorForm.errors.images && (
+                                <span className="text-sm text-red-500">{addColorForm.errors.images}</span>
                             )}
                         </div>
                         <div className="mt-2 ">
                             <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                                {images.map((img, index) => (
+                                {addColorForm.values.images.map((img, index) => (
                                     <ImageProduct key={index} src={URL.createObjectURL(img)} index={index} />
                                 ))}
                                 <div
@@ -179,7 +186,10 @@ const AddColor = () => {
                                         onChange={(e) => {
                                             const files = e.currentTarget.files;
                                             if (files.length) {
-                                                setImages((images) => [...images, ...files]);
+                                                addColorForm.setFieldValue('images', [
+                                                    ...addColorForm.values.images,
+                                                    ...files,
+                                                ]);
                                             }
                                         }}
                                         className="hidden"
@@ -189,16 +199,7 @@ const AddColor = () => {
                         </div>
                     </Card>
                 </div>
-                <Button
-                    type="submit"
-                    className="mt-4"
-                    onClick={() => {
-                        if (images.length == 0) {
-                            setImagesError('This field is required');
-                            // return;
-                        }
-                    }}
-                >
+                <Button type="submit" className="mt-4">
                     Add color
                 </Button>
             </form>

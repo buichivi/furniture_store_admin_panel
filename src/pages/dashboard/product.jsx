@@ -80,7 +80,7 @@ export function Product() {
                                 </td>
                             </tr>
                         )}
-                        {products?.map(({ _id, name, colors, category, priceOnSale, active }, index) => {
+                        {products?.map(({ _id, name, colors, category, priceOnSale, active, slug }, index) => {
                             const isLast = index === products.length - 1;
                             const classes = isLast ? 'p-4' : 'p-4 border-b border-blue-gray-50';
 
@@ -128,7 +128,7 @@ export function Product() {
                                     </td>
                                     <td className={classes}>
                                         <div className="flex items-center gap-2">
-                                            <Link to={`/dashboard/product/edit/${_id}`}>
+                                            <Link to={`/dashboard/product/edit/${slug}`}>
                                                 <Tooltip content="Edit product">
                                                     <IconButton variant="text">
                                                         <PencilIcon className="size-4" />

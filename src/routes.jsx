@@ -81,7 +81,7 @@ export const routes = [
 ];
 const subRoutes = [
     {
-        path: '/product/edit/:id',
+        path: '/product/edit/:slug',
 
         element: <EditProductForm />,
     },
@@ -91,12 +91,12 @@ const subRoutes = [
         element: <AddProduct />,
     },
     {
-        path: '/product/edit/:id/add-color',
+        path: '/product/edit/:slug/add-color',
 
         element: <AddColor />,
     },
     {
-        path: '/product/:productId/edit-color/:colorId',
+        path: '/product/:slug/edit-color/:colorId',
         element: <EditColor />,
     },
 ];

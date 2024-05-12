@@ -38,7 +38,7 @@ const formats = [
 ];
 
 const EditProductForm = () => {
-    const { id } = useParams();
+    const { slug } = useParams();
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
     const [product, setProduct] = useState({});
@@ -50,7 +50,7 @@ const EditProductForm = () => {
         Promise.all([
             apiRequest.get('/categories'),
             apiRequest.get('/tags'),
-            apiRequest.get('/products/' + id),
+            apiRequest.get('/products/' + slug),
             apiRequest.get('/brands'),
         ]).then((res) => {
             setCategories(res[0].data.categories);
@@ -61,7 +61,7 @@ const EditProductForm = () => {
     }, []);
 
     const handleDeleteColor = (colorId) => {
-        toast.promise(apiRequest.delete('/colors/' + id + '/' + colorId), {
+        toast.promise(apiRequest.delete('/colors/' + product._id + '/' + colorId), {
             loading: 'Deleting...',
             success: (res) => {
                 setProduct((product) => {
@@ -95,22 +95,23 @@ const EditProductForm = () => {
             name: Yup.string().required('This field is required'),
             description: Yup.string().required('This field is required'),
             SKU: Yup.string().required('This field is required'),
-            price: Yup.string().required('This field is required'),
-            discount: Yup.string().required('This field is required'),
+            price: Yup.number().required('This field is required'),
+            discount: Yup.number().required('This field is required'),
             brand: Yup.string().required('This field is required'),
             category: Yup.string().required('This field is required'),
             material: Yup.string().required('This field is required'),
             tags: Yup.array().min(1, 'Product must have at least 1 tag').required('This field is required'),
-            width: Yup.string().required('This field is required'),
-            height: Yup.string().required('This field is required'),
-            depth: Yup.string().required('This field is required'),
-            weight: Yup.string().required('This field is required'),
+            width: Yup.number().required('This field is required'),
+            height: Yup.number().required('This field is required'),
+            depth: Yup.number().required('This field is required'),
+            weight: Yup.number().required('This field is required'),
         }),
         enableReinitialize: true,
         onSubmit: (values) => {
-            toast.promise(apiRequest.put('/products/' + id, values), {
+            toast.promise(apiRequest.put('/products/' + product._id, values), {
                 loading: 'Editing...',
                 success: (res) => {
+                    console.log(values);
                     navigate('/dashboard/product');
                     return res.data.message;
                 },
@@ -228,7 +229,9 @@ const EditProductForm = () => {
                                         type="number"
                                         name="depth"
                                         value={productForm.values.depth}
-                                        onChange={productForm.handleChange}
+                                        onChange={(e) => {
+                                            productForm.setFieldValue('depth', Number(e.target.value));
+                                        }}
                                         min="0"
                                         placeholder="Product depth"
                                         className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-all focus:border-b-black"
@@ -444,7 +447,7 @@ const EditProductForm = () => {
                                             </span>
                                         </Tooltip>
                                     )}
-                                    <Link to={`/dashboard/product/${id}/edit-color/${_id}`}>
+                                    <Link to={`/dashboard/product/${slug}/edit-color/${_id}`}>
                                         <Tooltip content="Edit color">
                                             <img
                                                 src={thumb}
@@ -488,7 +491,7 @@ const EditProductForm = () => {
                         ))}
                         <Tooltip content="Add color">
                             <Link
-                                to={`/dashboard/product/edit/${id}/add-color`}
+                                to={`/dashboard/product/edit/${slug}/add-color`}
                                 className="flex size-14 cursor-pointer items-center justify-center border-2 border-dotted border-black"
                             >
                                 <PlusIcon className="size-6 text-black" />

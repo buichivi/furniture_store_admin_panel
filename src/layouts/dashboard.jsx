@@ -36,7 +36,9 @@ export function Dashboard() {
             <Sidenav routes={routes} brandImg={sidenavType === 'dark' ? '/img/logo.png' : '/img/logo.png'} />
             <div className="p-4 xl:ml-80">
                 <DashboardNavbar />
-                <Configurator />
+
+                {/* Configurator */}
+                {/* <Configurator />
                 <IconButton
                     size="lg"
                     color="white"
@@ -45,7 +47,7 @@ export function Dashboard() {
                     onClick={() => setOpenConfigurator(dispatch, true)}
                 >
                     <Cog6ToothIcon className="h-5 w-5" />
-                </IconButton>
+                </IconButton> */}
                 <Routes>
                     {routes.map(
                         ({ layout, pages }) =>

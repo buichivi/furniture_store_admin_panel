@@ -7,11 +7,10 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
-import { EditProductForm } from '.';
 
 const EditColor = () => {
     const [color, setColor] = useState({});
-    const { productId, colorId } = useParams();
+    const { slug, colorId } = useParams();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -57,7 +56,7 @@ const EditColor = () => {
             toast.promise(apiRequest.put('/colors/' + colorId, formData), {
                 loading: 'Updating...',
                 success: (res) => {
-                    navigate('/dashboard/product/edit/' + productId);
+                    navigate('/dashboard/product/edit/' + slug);
                     console.log(res.data.value);
                     return res.data.message;
                 },
@@ -108,7 +107,7 @@ const EditColor = () => {
         <form onSubmit={editColorForm.handleSubmit} className="py-6">
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                    <Link to={`/dashboard/product/edit/${productId}`}>
+                    <Link to={`/dashboard/product/edit/${slug}`}>
                         <Tooltip content="Back">
                             <IconButton>
                                 <ArrowLeftIcon className="size-4" />
