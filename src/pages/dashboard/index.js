@@ -5,3 +5,4 @@ export * from '@/pages/dashboard/notifications';
 export * from '@/pages/dashboard/product';
 export * from '@/pages/dashboard/category';
 export * from '@/pages/dashboard/brand';
+export * from '@/pages/dashboard/CategoryTree';

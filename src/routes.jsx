@@ -9,7 +9,7 @@ import {
     SparklesIcon,
     InboxIcon,
 } from '@heroicons/react/24/solid';
-import { Home, Profile, Tables, Notifications, Product, Category, Brand } from '@/pages/dashboard';
+import { Home, Profile, Tables, Notifications, Product, Category, Brand, CategoryTree } from '@/pages/dashboard';
 import { SignIn, SignUp } from '@/pages/auth';
 import { AddColor, AddProduct, EditCategoryForm, EditColor, EditProductForm } from './components';
 import { element } from 'prop-types';
@@ -30,9 +30,9 @@ export const routes = [
             },
             {
                 icon: <RectangleStackIcon {...icon} />,
-                name: 'category',
+                name: 'Category',
                 path: '/category',
-                element: <Category />,
+                element: <CategoryTree />,
             },
             {
                 icon: <SparklesIcon {...icon} />,

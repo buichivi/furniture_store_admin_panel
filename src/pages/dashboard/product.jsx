@@ -34,11 +34,13 @@ export function Product() {
         });
     };
 
-    const handleDeleteProduct = (id) => {
+    const handleDeleteProduct = (e, id) => {
         toast.promise(apiRequest.delete('/products/' + id), {
             loading: 'Deleting...',
             success: (res) => {
                 setProducts((products) => products.filter((prod) => prod._id != id));
+
+                // ! Handle when delete a product close modal
                 return res.data.message;
             },
             error: (err) => {
@@ -80,7 +82,7 @@ export function Product() {
                                 </td>
                             </tr>
                         )}
-                        {products?.map(({ _id, name, colors, category, priceOnSale, active, slug }, index) => {
+                        {products?.map(({ _id, name, colors, category, salePrice, active, slug }, index) => {
                             const isLast = index === products.length - 1;
                             const classes = isLast ? 'p-4' : 'p-4 border-b border-blue-gray-50';
 
@@ -115,7 +117,7 @@ export function Product() {
                                     </td>
                                     <td className={classes}>
                                         <Typography variant="small" color="blue-gray" className="font-normal">
-                                            ${priceOnSale}
+                                            ${salePrice}
                                         </Typography>
                                     </td>
                                     <td className={classes}>
@@ -159,7 +161,10 @@ export function Product() {
                                                     <h3 className="font-medium text-black">Delete product</h3>
                                                     <p className="mt-4 text-sm">Are you sure to delete this product?</p>
                                                     <div className="mt-6 flex items-center justify-center gap-2">
-                                                        <Button color="red" onClick={() => handleDeleteProduct(_id)}>
+                                                        <Button
+                                                            color="red"
+                                                            onClick={(e) => handleDeleteProduct(e, _id)}
+                                                        >
                                                             Delete
                                                         </Button>
                                                         <Button

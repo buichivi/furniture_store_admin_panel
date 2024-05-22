@@ -18,6 +18,7 @@ export function SignIn() {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+                withCredentials: true,
             })
             .then((res) => {
                 navigate('/');
