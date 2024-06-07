@@ -339,23 +339,21 @@ const EditProductForm = () => {
                             </div>
                             <div className="mt-4">
                                 {brands?.length > 0 && (
-                                    <Autocomplete
-                                        fullWidth
-                                        size="small"
+                                    <select
+                                        name="parentId"
                                         value={productForm.values.brand}
-                                        onChange={(e, value) => {
-                                            productForm.setFieldValue('brand', value);
-                                        }}
-                                        isOptionEqualToValue={(op, val) => {
-                                            return op == val;
-                                        }}
-                                        options={brands.map((brand) => brand._id)}
-                                        getOptionLabel={(option) => {
-                                            const label = brands?.find((brand) => brand._id == option)?.name || '';
-                                            return label;
-                                        }}
-                                        renderInput={(params) => <TextField {...params} label="Select brand" />}
-                                    />
+                                        onChange={productForm.handleChange}
+                                        className="w-full rounded-md border border-black px-2 py-2 outline-none"
+                                    >
+                                        <option value="">Select brand</option>
+                                        {brands.map((brand, index) => {
+                                            return (
+                                                <option key={index} value={brand._id}>
+                                                    {brand?.name}
+                                                </option>
+                                            );
+                                        })}
+                                    </select>
                                 )}
                             </div>
                         </div>
@@ -368,23 +366,23 @@ const EditProductForm = () => {
                             </div>
                             <div className="mt-4">
                                 {categories.length > 0 && (
-                                    <Autocomplete
-                                        fullWidth
-                                        size="small"
+                                    <select
+                                        name="parentId"
                                         value={productForm.values.category}
-                                        onChange={(e, value) => {
-                                            productForm.setFieldValue('category', value);
-                                        }}
-                                        isOptionEqualToValue={(op, val) => {
-                                            return op == val;
-                                        }}
-                                        options={categories.map((cate) => cate._id)}
-                                        getOptionLabel={(option) => {
-                                            const label = categories?.find((cate) => cate._id == option)?.name || '';
-                                            return label;
-                                        }}
-                                        renderInput={(params) => <TextField {...params} label="Select category" />}
-                                    />
+                                        onChange={productForm.handleChange}
+                                        className="w-full rounded-md border border-black px-2 py-2 outline-none"
+                                    >
+                                        <option value="">Select category</option>
+                                        {categories
+                                            .filter((cate) => cate.parentId != '')
+                                            .map((cate, index) => {
+                                                return (
+                                                    <option key={index} value={cate._id}>
+                                                        {cate?.name}
+                                                    </option>
+                                                );
+                                            })}
+                                    </select>
                                 )}
                             </div>
                         </div>

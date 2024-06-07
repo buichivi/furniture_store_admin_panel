@@ -139,25 +139,23 @@ export const CategoryTree = () => {
                             )}
                             <div>
                                 {categories.length > 0 && (
-                                    <Autocomplete
-                                        fullWidth
-                                        disableClearable
-                                        size="small"
+                                    <select
+                                        name="parentId"
                                         value={addCateForm.values.parentId}
-                                        onChange={(e, value) => {
-                                            console.log(value);
-                                            addCateForm.setFieldValue('parentId', value);
-                                        }}
-                                        isOptionEqualToValue={(op, val) => {
-                                            return op == val;
-                                        }}
-                                        options={categories.map((cate) => cate._id)}
-                                        getOptionLabel={(option) => {
-                                            const label = categories?.find((cate) => cate._id == option)?.name || '';
-                                            return label;
-                                        }}
-                                        renderInput={(params) => <TextField {...params} label="Select category" />}
-                                    />
+                                        onChange={addCateForm.handleChange}
+                                        className="w-full rounded-md border border-black px-2 py-2 outline-none"
+                                    >
+                                        <option value="">Select category</option>
+                                        {categories
+                                            .filter((cate) => cate.parentId == '')
+                                            .map((cate, index) => {
+                                                return (
+                                                    <option key={index} value={cate._id}>
+                                                        {cate?.name}
+                                                    </option>
+                                                );
+                                            })}
+                                    </select>
                                 )}
                             </div>
                         </div>
@@ -186,8 +184,8 @@ export const CategoryTree = () => {
                                     accept="image/*"
                                     id="add-cate-image"
                                     onChange={(e) => {
-                                        addCateForm.setFieldValue('imageUrl', e.target.files[0]);
-                                        e.currentTarget.previousElementSibling.previousElementSibling.current.src =
+                                        addCateForm.setFieldValue('imageUrl', e.currentTarget.files[0]);
+                                        e.currentTarget.previousElementSibling.previousElementSibling.src =
                                             URL.createObjectURL(e.currentTarget.files[0]);
                                     }}
                                     className="hidden"

@@ -2,6 +2,7 @@ import useCategoryStore from '@/stores/categoryStore';
 import apiRequest from '@/utils/apiRequest';
 import { PencilIcon } from '@heroicons/react/24/solid';
 import { Button, Card, Option, Select, Typography } from '@material-tailwind/react';
+import { Autocomplete, TextField } from '@mui/material';
 import { useFormik } from 'formik';
 import { useRef } from 'react';
 import toast from 'react-hot-toast';
@@ -10,7 +11,7 @@ import * as Yup from 'yup';
 const EditCategoryForm = ({ category = {}, index = {} }) => {
     const { categories, setCategories } = useCategoryStore();
     const previewCateImage = useRef();
-    const { _id, name, imageUrl, description } = category;
+    const { _id, name, imageUrl, description, parentId } = category;
 
     // Handle edit category
 
@@ -18,9 +19,10 @@ const EditCategoryForm = ({ category = {}, index = {} }) => {
         initialValues: {
             name: name,
             description: description,
-            imageUrl: '',
-            parentId: '',
+            imageUrl: imageUrl,
+            parentId: parentId,
         },
+        enableReinitialize: true,
         validationSchema: Yup.object({
             name: Yup.string().required('This field is required'),
             description: Yup.string().required('This field is required'),
@@ -90,21 +92,25 @@ const EditCategoryForm = ({ category = {}, index = {} }) => {
                         </Typography>
                     )}
                     <div>
-                        <Select
-                            label="Select Version"
-                            onChange={(value) => editCateForm.setFieldValue('parentId', value)}
-                        >
-                            <Option value="" defaultChecked>
-                                Select category
-                            </Option>
-                            {categories.map((cate) => {
-                                return (
-                                    <Option key={cate._id} value={cate._id}>
-                                        {cate.name}
-                                    </Option>
-                                );
-                            })}
-                        </Select>
+                        {categories.length > 0 && (
+                            <select
+                                name="parentId"
+                                value={editCateForm.values.parentId}
+                                onChange={editCateForm.handleChange}
+                                className="w-full rounded-md border border-black px-2 py-2 outline-none"
+                            >
+                                <option value="">Select category</option>
+                                {categories
+                                    .filter((cate) => cate.parentId == '')
+                                    .map((cate, index) => {
+                                        return (
+                                            <option key={index} value={cate._id} selected={cate._id === category._id}>
+                                                {cate?.name}
+                                            </option>
+                                        );
+                                    })}
+                            </select>
+                        )}
                     </div>
                 </div>
                 <div className="mt-4">
