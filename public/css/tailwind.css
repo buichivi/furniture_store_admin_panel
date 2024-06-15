@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+    .no-spinner {
+        /* Ẩn các mũi tên điều chỉnh trên các trình duyệt khác nhau */
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+            @apply appearance-none;
+            margin: 0;
+        }
+
+        & {
+            @apply appearance-none;
+            -moz-appearance: textfield;
+        }
+    }
+}
+
 html {
     scrollbar-width: thin;
+}
+
+/* Date picker */
+.react-datepicker-wrapper {
+    width: 100%;
 }

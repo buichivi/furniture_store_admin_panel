@@ -6,3 +6,4 @@ export * from '@/pages/dashboard/product';
 export * from '@/pages/dashboard/category';
 export * from '@/pages/dashboard/brand';
 export * from '@/pages/dashboard/CategoryTree';
+export * from '@/pages/dashboard/promocode';

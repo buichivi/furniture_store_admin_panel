@@ -8,8 +8,19 @@ import {
     ShoppingCartIcon,
     SparklesIcon,
     InboxIcon,
+    TicketIcon,
 } from '@heroicons/react/24/solid';
-import { Home, Profile, Tables, Notifications, Product, Category, Brand, CategoryTree } from '@/pages/dashboard';
+import {
+    Home,
+    Profile,
+    Tables,
+    Notifications,
+    Product,
+    Category,
+    Brand,
+    CategoryTree,
+    PromoCode,
+} from '@/pages/dashboard';
 import { SignIn, SignUp } from '@/pages/auth';
 import { AddColor, AddProduct, EditCategoryForm, EditColor, EditProductForm } from './components';
 import { element } from 'prop-types';
@@ -45,6 +56,12 @@ export const routes = [
                 name: 'product',
                 path: '/product',
                 element: <Product />,
+            },
+            {
+                icon: <TicketIcon {...icon} />,
+                name: 'promo code',
+                path: '/promocode',
+                element: <PromoCode />,
             },
             // {
             //     icon: <UserCircleIcon {...icon} />,
