@@ -101,7 +101,7 @@ const EditCategoryForm = ({ category = {}, index = {} }) => {
                             >
                                 <option value="">Select category</option>
                                 {categories
-                                    .filter((cate) => cate.parentId == '')
+                                    .filter((cate) => cate.parentId == '' && cate._id != category._id)
                                     .map((cate, index) => {
                                         return (
                                             <option key={index} value={cate._id} selected={cate._id === category._id}>
