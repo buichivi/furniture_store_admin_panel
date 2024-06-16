@@ -225,7 +225,11 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
         toast.promise(apiRequest.delete('/categories/' + id), {
             loading: 'Deleting...',
             success: (res) => {
-                setCategories(categories.filter((cate) => cate._id !== id));
+                setCategories(
+                    categories
+                        .map((cate) => (cate.parentId == id ? { ...cate, parentId: '' } : cate))
+                        .filter((cate) => cate._id !== id),
+                );
                 return res.data?.message;
             },
             error: (err) => {

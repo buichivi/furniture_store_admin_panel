@@ -323,9 +323,11 @@ const EditProductForm = () => {
                             <div className="mt-4">
                                 {product?.brand?.name && brands.length > 0 && (
                                     <select
-                                        name="parentId"
+                                        name="brand"
                                         value={productForm.values.brand}
-                                        onChange={productForm.handleChange}
+                                        onChange={(e) => {
+                                            productForm.setFieldValue('brand', e.currentTarget.value);
+                                        }}
                                         className="w-full rounded-md border border-black px-2 py-2 outline-none"
                                     >
                                         <option value="">Select brand</option>
@@ -354,9 +356,11 @@ const EditProductForm = () => {
                             <div className="mt-4">
                                 {product?.category?.name && categories.length > 0 && (
                                     <select
-                                        name="parentId"
+                                        name="category"
                                         value={productForm.values.category}
-                                        onChange={productForm.handleChange}
+                                        onChange={(e) => {
+                                            productForm.setFieldValue('category', e.currentTarget.value);
+                                        }}
                                         className="w-full rounded-md border border-black px-2 py-2 outline-none"
                                     >
                                         <option value="">Select category</option>
