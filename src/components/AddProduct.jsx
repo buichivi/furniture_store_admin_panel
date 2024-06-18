@@ -113,7 +113,7 @@ const EditProductForm = () => {
                     navigate('/dashboard/product');
                     return res.data.message;
                 },
-                error: (err) => err?.response?.data?.message || 'Something went wrong',
+                error: (err) => err?.response?.data?.error || 'Something went wrong',
             });
         },
     });

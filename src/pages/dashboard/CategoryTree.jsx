@@ -1,5 +1,5 @@
-import { EyeIcon, EyeSlashIcon, PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Button, Card, IconButton, Option, Select, Tooltip, Typography } from '@material-tailwind/react';
+import { EyeIcon, EyeSlashIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { Button, Card, IconButton, Tooltip, Typography } from '@material-tailwind/react';
 import useCategoryStore from '@/stores/categoryStore';
 import { useEffect, useState } from 'react';
 import apiRequest from '@/utils/apiRequest';
@@ -7,7 +7,6 @@ import toast from 'react-hot-toast';
 import { EditCategoryForm } from '@/components';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Autocomplete, TextField } from '@mui/material';
 
 const getCategoryTree = (categories) => {
     const categoryMap = {};
@@ -220,6 +219,7 @@ export const CategoryTree = () => {
 const CategoryItem = ({ category = {}, className = '', isParent = true, drag = false }) => {
     const { dragCate, setDragCate, moveCate, categories, setCategories } = useCategoryStore();
     const [drop, setDrop] = useState(false);
+    console.log(category, drag);
 
     const handleDeleteCate = (id) => {
         toast.promise(apiRequest.delete('/categories/' + id), {
@@ -275,7 +275,11 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
                         <span className="color-black opacity-40 ">-------</span>
                     </div>
                 )}
-                <div className="flex items-center gap-2" draggable={drag} onDragStart={() => setDragCate(category)}>
+                <div
+                    className={`flex items-center gap-2 ${drag ? 'select-auto' : 'select-none'}`}
+                    draggable={drag}
+                    onDragStart={() => setDragCate(category)}
+                >
                     <div className="flex min-h-5 min-w-[200px] cursor-default items-center justify-between gap-2 rounded-md bg-white p-2 text-black shadow-lg">
                         {category?.name}
                         <div className="flex items-center gap-2">
