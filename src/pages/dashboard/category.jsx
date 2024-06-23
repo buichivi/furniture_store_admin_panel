@@ -8,12 +8,13 @@ import { EditCategoryForm } from '@/components';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { InboxIcon } from '@heroicons/react/24/solid';
+import useAuthStore from '@/stores/authStore';
 const TABLE_HEAD = ['Name', 'Image', 'Description', 'Active', 'Action'];
 
 export function Category() {
     const [categories, setCategories] = useState([]);
     const previewCateImage = useRef();
-    const token = localStorage.getItem('token');
+    const { token } = useAuthStore();
     useEffect(() => {
         apiRequest
             .get('/categories')

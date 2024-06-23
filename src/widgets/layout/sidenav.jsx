@@ -9,7 +9,7 @@ import apiRequest from '@/utils/apiRequest';
 
 export function Sidenav({ brandImg, brandName, routes }) {
     const [controller, dispatch] = useMaterialTailwindController();
-    const { currentUser, logout } = useAuthStore();
+    const { currentUser, logout, token } = useAuthStore();
     const { sidenavColor, sidenavType, openSidenav } = controller;
     const navigate = useNavigate();
     const sidenavTypes = {
@@ -93,15 +93,22 @@ export function Sidenav({ brandImg, brandName, routes }) {
                     color="black"
                     variant="text"
                     onClick={() => {
-                        toast.promise(apiRequest.patch('/auth/admin/logout', { userId: currentUser._id }), {
-                            loading: 'Logout...',
-                            success: (res) => {
-                                logout();
-                                navigate('/admin/login');
-                                return res.data.message;
+                        toast.promise(
+                            apiRequest.patch(
+                                '/auth/admin/logout',
+                                { userId: currentUser._id },
+                                { headers: { Authorization: 'Bearer ' + token } },
+                            ),
+                            {
+                                loading: 'Logout...',
+                                success: (res) => {
+                                    logout();
+                                    navigate('/admin/login');
+                                    return res.data.message;
+                                },
+                                error: (err) => err.response.data.message,
                             },
-                            error: (err) => err.response.data.message,
-                        });
+                        );
                     }}
                 >
                     <ArrowLeftOnRectangleIcon className="size-6" />

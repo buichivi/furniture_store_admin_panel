@@ -1,3 +1,4 @@
+import useAuthStore from '@/stores/authStore';
 import apiRequest from '@/utils/apiRequest';
 import { Button, Card, Typography } from '@material-tailwind/react';
 import { useFormik } from 'formik';
@@ -6,7 +7,7 @@ import * as Yup from 'yup';
 
 const EditBrandForm = ({ brand = {}, index = {}, setBrands = () => {} }) => {
     const { _id, name, description } = brand;
-    const token = localStorage.getItem('token');
+    const { token } = useAuthStore();
 
     // Handle edit category
 
@@ -20,20 +21,27 @@ const EditBrandForm = ({ brand = {}, index = {}, setBrands = () => {} }) => {
             description: Yup.string().required('This field is required'),
         }),
         onSubmit: (values) => {
-            toast.promise(apiRequest.put('/brands/' + _id, values), {
-                loading: 'Updating...',
-                success: (res) => {
-                    setBrands((brands) => {
-                        const newBrand = brands.map((brand) => (brand._id === _id ? res.data.brand : brand));
-                        return newBrand;
-                    });
-                    return res.data.message;
+            toast.promise(
+                apiRequest.put('/brands/' + _id, values, {
+                    headers: {
+                        Authorization: `Bearer ` + token,
+                    },
+                }),
+                {
+                    loading: 'Updating...',
+                    success: (res) => {
+                        setBrands((brands) => {
+                            const newBrand = brands.map((brand) => (brand._id === _id ? res.data.brand : brand));
+                            return newBrand;
+                        });
+                        return res.data.message;
+                    },
+                    error: (err) => {
+                        console.log(err);
+                        return err.response.data.error || 'Something went wrong';
+                    },
                 },
-                error: (err) => {
-                    console.log(err);
-                    return err.response.data.error || 'Something went wrong';
-                },
-            });
+            );
         },
     });
     return (

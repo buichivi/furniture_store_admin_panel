@@ -1,3 +1,4 @@
+import useAuthStore from '@/stores/authStore';
 import apiRequest from '@/utils/apiRequest';
 import { ArrowLeftIcon, CloudArrowUpIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { TrashIcon } from '@heroicons/react/24/outline';
@@ -11,6 +12,7 @@ import * as Yup from 'yup';
 const AddColor = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
+    const { token } = useAuthStore();
 
     const addColorForm = useFormik({
         initialValues: {
@@ -36,17 +38,24 @@ const AddColor = () => {
                 }
                 formData.append(key, values[key]);
             }
-            toast.promise(apiRequest.post('/colors/' + slug, formData), {
-                loading: 'Creating...',
-                success: (res) => {
-                    navigate('/dashboard/product/edit/' + slug);
-                    return res.data.message;
+            toast.promise(
+                apiRequest.post('/colors/' + slug, formData, {
+                    headers: {
+                        Authorization: `Bearer ` + token,
+                    },
+                }),
+                {
+                    loading: 'Creating...',
+                    success: (res) => {
+                        navigate('/dashboard/product/edit/' + slug);
+                        return res.data.message;
+                    },
+                    error: (err) => {
+                        console.log(err);
+                        return err.response.data.error || 'Something went wrong';
+                    },
                 },
-                error: (err) => {
-                    console.log(err);
-                    return err.response.data.error || 'Something went wrong';
-                },
-            });
+            );
         },
     });
 

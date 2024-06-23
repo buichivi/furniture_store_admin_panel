@@ -7,8 +7,18 @@ import 'react-datepicker/dist/react-datepicker.css';
 import toast from 'react-hot-toast';
 import apiRequest from '@/utils/apiRequest';
 import PropTypes from 'prop-types';
+import moment from 'moment-timezone';
+import useAuthStore from '@/stores/authStore';
+
+const formatDateForApi = (date) => {
+    // Chuyển đổi thời gian sang UTC và định dạng lại
+    const formattedDate = moment(date).tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD HH:mm:ss');
+    return formattedDate;
+};
 
 const AddPromoCode = ({ setPromoCodes }) => {
+    const { token } = useAuthStore();
+
     const addPromoCode = useFormik({
         initialValues: {
             code: '',
@@ -34,7 +44,11 @@ const AddPromoCode = ({ setPromoCodes }) => {
                         schema.positive('Discount must be a positive number').integer('Discount must be an integer'),
                 }),
             startDate: Yup.date()
-                .min(new Date(), 'Start date cannot be in the past')
+                .transform(function (value, originalValue) {
+                    // Loại bỏ phần thời gian, chỉ lấy phần ngày
+                    return originalValue ? new Date(new Date(originalValue).setHours(0, 0, 0, 0)) : null;
+                })
+                .min(new Date(new Date().setHours(0, 0, 0, 0)), 'Start date cannot be in the past')
                 .required('This field is required'),
             endDate: Yup.date()
                 .required('This field is required')
@@ -42,17 +56,33 @@ const AddPromoCode = ({ setPromoCodes }) => {
             maxUsage: Yup.number().min(1, 'Max usage must be at least 1').required('This field is required'),
         }),
         onSubmit: (values, { resetForm }) => {
-            toast.promise(apiRequest.post('/promo-code', values), {
-                loading: 'Creating...',
-                success: (res) => {
-                    setPromoCodes((promoCodes) => [...promoCodes, res.data.promoCode]);
-                    resetForm();
-                    return res.data?.message;
+            const formattedEndDate = formatDateForApi(values.endDate);
+            const formattedStartDate = formatDateForApi(values.startDate); // Nếu bạn cần xử lý startDate tương tự
+
+            const payload = {
+                ...values,
+                endDate: formattedEndDate,
+                startDate: formattedStartDate,
+            };
+            console.log(payload);
+            toast.promise(
+                apiRequest.post('/promo-code', payload, {
+                    headers: {
+                        Authorization: `Bearer ` + token,
+                    },
+                }),
+                {
+                    loading: 'Creating...',
+                    success: (res) => {
+                        setPromoCodes((promoCodes) => [...promoCodes, res.data.promoCode]);
+                        resetForm();
+                        return res.data?.message;
+                    },
+                    error: (err) => {
+                        return err.response.data.error;
+                    },
                 },
-                error: (err) => {
-                    return err.response.data.error;
-                },
-            });
+            );
         },
     });
 
@@ -134,7 +164,11 @@ const AddPromoCode = ({ setPromoCodes }) => {
                                 <DatePicker
                                     name="startDate"
                                     selected={addPromoCode.values.startDate}
-                                    onChange={(date) => addPromoCode.setFieldValue('startDate', date)}
+                                    onChange={(date) => {
+                                        console.log(date);
+                                        addPromoCode.setFieldValue('startDate', date);
+                                    }}
+                                    minDate={new Date()}
                                     className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-all focus:border-b-black"
                                     placeholderText="Select start date"
                                 />
@@ -150,6 +184,11 @@ const AddPromoCode = ({ setPromoCodes }) => {
                                     name="endDate"
                                     selected={addPromoCode.values.endDate}
                                     onChange={(date) => addPromoCode.setFieldValue('endDate', date)}
+                                    minDate={
+                                        addPromoCode.values.startDate
+                                            ? moment(addPromoCode.values.startDate).add(1, 'days').toDate()
+                                            : null
+                                    }
                                     className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-all focus:border-b-black"
                                     placeholderText="Select end date"
                                 />

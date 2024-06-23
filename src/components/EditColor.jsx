@@ -1,3 +1,4 @@
+import useAuthStore from '@/stores/authStore';
 import apiRequest from '@/utils/apiRequest';
 import { ArrowLeftIcon, CloudArrowUpIcon, PencilIcon, Square2StackIcon } from '@heroicons/react/24/outline';
 import { TrashIcon } from '@heroicons/react/24/outline';
@@ -12,6 +13,7 @@ const EditColor = () => {
     const [color, setColor] = useState({});
     const { slug, colorId } = useParams();
     const navigate = useNavigate();
+    const { token } = useAuthStore();
 
     useEffect(() => {
         apiRequest
@@ -53,18 +55,25 @@ const EditColor = () => {
                 }
                 formData.append(key, values[key]);
             }
-            toast.promise(apiRequest.put('/colors/' + colorId, formData), {
-                loading: 'Updating...',
-                success: (res) => {
-                    navigate('/dashboard/product/edit/' + slug);
-                    console.log(res.data.value);
-                    return res.data.message;
+            toast.promise(
+                apiRequest.put('/colors/' + colorId, formData, {
+                    headers: {
+                        Authorization: `Bearer ` + token,
+                    },
+                }),
+                {
+                    loading: 'Updating...',
+                    success: (res) => {
+                        navigate('/dashboard/product/edit/' + slug);
+                        console.log(res.data.value);
+                        return res.data.message;
+                    },
+                    error: (err) => {
+                        console.log(err);
+                        return err.response.data.error || 'Something went wrong';
+                    },
                 },
-                error: (err) => {
-                    console.log(err);
-                    return err.response.data.error || 'Something went wrong';
-                },
-            });
+            );
         },
     });
 

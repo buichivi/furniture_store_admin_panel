@@ -1,20 +1,29 @@
+import useAuthStore from '@/stores/authStore';
 import apiRequest from '@/utils/apiRequest';
 import { Button, Card } from '@material-tailwind/react';
 import PropTypes from 'prop-types';
 import toast from 'react-hot-toast';
 
 const DeletePromoCode = ({ id, code, setPromoCodes }) => {
+    const { token } = useAuthStore();
     const handleDeletePromoCode = () => {
-        toast.promise(apiRequest.delete('/promo-code/' + id), {
-            loading: 'Deleting...',
-            success: (res) => {
-                setPromoCodes((promoCodes) => promoCodes.filter((promo) => promo._id != id));
-                return res.data.message;
+        toast.promise(
+            apiRequest.delete('/promo-code/' + id, {
+                headers: {
+                    Authorization: `Bearer ` + token,
+                },
+            }),
+            {
+                loading: 'Deleting...',
+                success: (res) => {
+                    setPromoCodes((promoCodes) => promoCodes.filter((promo) => promo._id != id));
+                    return res.data.message;
+                },
+                error: (err) => {
+                    err.response?.data?.error;
+                },
             },
-            error: (err) => {
-                err.response?.data?.error;
-            },
-        });
+        );
     };
 
     return (

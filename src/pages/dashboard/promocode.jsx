@@ -1,4 +1,5 @@
 import { AddPromoCode, DeletePromoCode, EditPromoCode } from '@/components';
+import useAuthStore from '@/stores/authStore';
 import apiRequest from '@/utils/apiRequest';
 import { InboxIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { Button, Card, IconButton, Switch, Tooltip, Typography } from '@material-tailwind/react';
@@ -8,6 +9,7 @@ const TABLE_HEAD = ['Code', 'Type', 'Discount', 'Start Date', 'End Date', 'Usage
 
 const PromoCode = () => {
     const [promoCodes, setPromoCodes] = useState([]);
+    const { token } = useAuthStore();
 
     useEffect(() => {
         apiRequest
@@ -16,11 +18,18 @@ const PromoCode = () => {
             .catch((err) => console.log(err));
     }, []);
     const handleActiveProduct = (e, id) => {
-        toast.promise(apiRequest.patch('/promo-code/' + id, { active: e.currentTarget.checked }), {
-            loading: 'Updating...',
-            success: (res) => res.data.message,
-            error: (err) => err.response.data.error,
-        });
+        toast.promise(
+            apiRequest.patch(
+                '/promo-code/' + id,
+                { active: e.currentTarget.checked },
+                { headers: { Authorization: 'Bearer ' + token } },
+            ),
+            {
+                loading: 'Updating...',
+                success: (res) => res.data.message,
+                error: (err) => err.response.data.error,
+            },
+        );
     };
 
     return (

@@ -7,3 +7,4 @@ export { default as AddProduct } from './AddProduct';
 export { default as AddPromoCode } from './AddPromoCode';
 export { default as EditPromoCode } from './EditPromoCode';
 export { default as DeletePromoCode } from './DeletePromoCode';
+export { default as EditOrder } from './EditOrder';

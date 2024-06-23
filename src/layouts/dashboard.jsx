@@ -13,7 +13,7 @@ export function Dashboard() {
     const { sidenavType } = controller;
     const { loginUser } = useAuthStore();
     const navigate = useNavigate();
-    const token = localStorage.getItem('token');
+    const { token } = useAuthStore();
 
     useEffect(() => {
         apiRequest

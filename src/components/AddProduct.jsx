@@ -11,6 +11,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 import { ArrowLeftIcon, CloudArrowUpIcon, Square2StackIcon } from '@heroicons/react/24/outline';
+import useAuthStore from '@/stores/authStore';
 
 const modules = {
     toolbar: [
@@ -41,6 +42,7 @@ const EditProductForm = () => {
     const [categories, setCategories] = useState([]);
     const [brands, setBrands] = useState([]);
     const [tags, setTags] = useState([]);
+    const { token } = useAuthStore();
 
     const navigate = useNavigate();
 
@@ -107,14 +109,21 @@ const EditProductForm = () => {
                 }
                 formData.append(key, values[key]);
             }
-            toast.promise(apiRequest.post('/products', formData), {
-                loading: 'Creating...',
-                success: (res) => {
-                    navigate('/dashboard/product');
-                    return res.data.message;
+            toast.promise(
+                apiRequest.post('/products', formData, {
+                    headers: {
+                        Authorization: `Bearer ` + token,
+                    },
+                }),
+                {
+                    loading: 'Creating...',
+                    success: (res) => {
+                        navigate('/dashboard/product');
+                        return res.data.message;
+                    },
+                    error: (err) => err?.response?.data?.error || 'Something went wrong',
                 },
-                error: (err) => err?.response?.data?.error || 'Something went wrong',
-            });
+            );
         },
     });
 

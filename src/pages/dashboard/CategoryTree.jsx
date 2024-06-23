@@ -1,5 +1,5 @@
 import { EyeIcon, EyeSlashIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Button, Card, IconButton, Tooltip, Typography } from '@material-tailwind/react';
+import { Button, Card, IconButton, Tooltip, Typography, useTabs } from '@material-tailwind/react';
 import useCategoryStore from '@/stores/categoryStore';
 import { useEffect, useState } from 'react';
 import apiRequest from '@/utils/apiRequest';
@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { EditCategoryForm } from '@/components';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import useAuthStore from '@/stores/authStore';
 
 const getCategoryTree = (categories) => {
     const categoryMap = {};
@@ -24,6 +25,7 @@ const getCategoryTree = (categories) => {
 };
 
 export const CategoryTree = () => {
+    const { token } = useAuthStore();
     const { categories, setCategories } = useCategoryStore();
 
     useEffect(() => {
@@ -51,18 +53,21 @@ export const CategoryTree = () => {
             for (const key in values) {
                 formData.append(key, values[key]);
             }
-            toast.promise(apiRequest.post('/categories/', formData), {
-                loading: 'Creating...',
-                success: (res) => {
-                    setCategories([...categories, res.data.category]);
-                    resetForm();
-                    return res.data.message;
+            toast.promise(
+                apiRequest.post('/categories/', formData, { headers: { Authorization: 'Bearer ' + token } }),
+                {
+                    loading: 'Creating...',
+                    success: (res) => {
+                        setCategories([...categories, res.data.category]);
+                        resetForm();
+                        return res.data.message;
+                    },
+                    error: (err) => {
+                        console.log(err);
+                        return err.response.data.error || 'Something went wrong';
+                    },
                 },
-                error: (err) => {
-                    console.log(err);
-                    return err.response.data.error || 'Something went wrong';
-                },
-            });
+            );
         },
     });
 
@@ -219,10 +224,11 @@ export const CategoryTree = () => {
 const CategoryItem = ({ category = {}, className = '', isParent = true, drag = false }) => {
     const { dragCate, setDragCate, moveCate, categories, setCategories } = useCategoryStore();
     const [drop, setDrop] = useState(false);
+    const { token } = useAuthStore();
     console.log(category, drag);
 
     const handleDeleteCate = (id) => {
-        toast.promise(apiRequest.delete('/categories/' + id), {
+        toast.promise(apiRequest.delete('/categories/' + id, { headers: { Authorization: 'Bearer ' + token } }), {
             loading: 'Deleting...',
             success: (res) => {
                 setCategories(
@@ -252,14 +258,21 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
             }}
             onDrop={() => {
                 if (category.parentId == '') {
-                    toast.promise(apiRequest.patch('/categories/' + dragCate._id, { parentId: category._id }), {
-                        loading: 'Updating...',
-                        success: (res) => {
-                            moveCate(category._id);
-                            return res.data.message;
+                    toast.promise(
+                        apiRequest.patch(
+                            '/categories/' + dragCate._id,
+                            { parentId: category._id },
+                            { headers: { Authorization: 'Bearer ' + token } },
+                        ),
+                        {
+                            loading: 'Updating...',
+                            success: (res) => {
+                                moveCate(category._id);
+                                return res.data.message;
+                            },
+                            error: (err) => err.response.data.error,
                         },
-                        error: (err) => err.response.data.error,
-                    });
+                    );
                     setDrop(false);
                 }
             }}
@@ -358,7 +371,11 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
                         color="white"
                         onClick={(e) => {
                             toast.promise(
-                                apiRequest.patch('/categories/' + category._id, { active: !category.active }),
+                                apiRequest.patch(
+                                    '/categories/' + category._id,
+                                    { active: !category.active },
+                                    { headers: { Authorization: 'Bearer ' + token } },
+                                ),
                                 {
                                     loading: 'Updating...',
                                     success: (res) => {

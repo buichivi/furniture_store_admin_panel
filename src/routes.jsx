@@ -1,14 +1,11 @@
 import {
     HomeIcon,
-    UserCircleIcon,
-    TableCellsIcon,
-    InformationCircleIcon,
     ServerStackIcon,
     RectangleStackIcon,
-    ShoppingCartIcon,
     SparklesIcon,
     InboxIcon,
     TicketIcon,
+    ClipboardDocumentListIcon,
 } from '@heroicons/react/24/solid';
 import {
     Home,
@@ -22,8 +19,9 @@ import {
     PromoCode,
 } from '@/pages/dashboard';
 import { SignIn, SignUp } from '@/pages/auth';
-import { AddColor, AddProduct, EditCategoryForm, EditColor, EditProductForm } from './components';
+import { AddColor, AddProduct, EditCategoryForm, EditColor, EditOrder, EditProductForm } from './components';
 import { element } from 'prop-types';
+import Order from './pages/dashboard/order';
 
 const icon = {
     className: 'w-5 h-5 text-inherit',
@@ -63,6 +61,12 @@ export const routes = [
                 path: '/promocode',
                 element: <PromoCode />,
             },
+            {
+                icon: <ClipboardDocumentListIcon {...icon} />,
+                name: 'Order',
+                path: '/order',
+                element: <Order />,
+            },
             // {
             //     icon: <UserCircleIcon {...icon} />,
             //     name: 'profile',
@@ -99,22 +103,23 @@ export const routes = [
 const subRoutes = [
     {
         path: '/product/edit/:slug',
-
         element: <EditProductForm />,
     },
     {
         path: '/product/create',
-
         element: <AddProduct />,
     },
     {
         path: '/product/edit/:slug/add-color',
-
         element: <AddColor />,
     },
     {
         path: '/product/:slug/edit-color/:colorId',
         element: <EditColor />,
+    },
+    {
+        path: '/order/edit/:id',
+        element: <EditOrder />,
     },
 ];
 

@@ -11,6 +11,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 import { ArrowLeftIcon, Square2StackIcon } from '@heroicons/react/24/outline';
+import useAuthStore from '@/stores/authStore';
 
 const modules = {
     toolbar: [
@@ -43,6 +44,7 @@ const EditProductForm = () => {
     const [brands, setBrands] = useState([]);
     const [product, setProduct] = useState({});
     const [tags, setTags] = useState([]);
+    const { token } = useAuthStore();
 
     const navigate = useNavigate();
 
@@ -61,18 +63,25 @@ const EditProductForm = () => {
     }, []);
 
     const handleDeleteColor = (colorId) => {
-        toast.promise(apiRequest.delete('/colors/' + product._id + '/' + colorId), {
-            loading: 'Deleting...',
-            success: (res) => {
-                setProduct((product) => {
-                    return { ...product, colors: product.colors.filter((color) => color._id != colorId) };
-                });
-                return res.data.message;
+        toast.promise(
+            apiRequest.delete('/colors/' + product._id + '/' + colorId, {
+                headers: {
+                    Authorization: `Bearer ` + token,
+                },
+            }),
+            {
+                loading: 'Deleting...',
+                success: (res) => {
+                    setProduct((product) => {
+                        return { ...product, colors: product.colors.filter((color) => color._id != colorId) };
+                    });
+                    return res.data.message;
+                },
+                error: (err) => {
+                    return err?.response?.data?.error || 'Somthing went wrong';
+                },
             },
-            error: (err) => {
-                return err?.response?.data?.error || 'Somthing went wrong';
-            },
-        });
+        );
     };
 
     const productForm = useFormik({
@@ -108,15 +117,22 @@ const EditProductForm = () => {
         }),
         enableReinitialize: true,
         onSubmit: (values) => {
-            toast.promise(apiRequest.put('/products/' + product._id, values), {
-                loading: 'Editing...',
-                success: (res) => {
-                    console.log(values);
-                    navigate('/dashboard/product');
-                    return res.data.message;
+            toast.promise(
+                apiRequest.put('/products/' + product._id, values, {
+                    headers: {
+                        Authorization: `Bearer ` + token,
+                    },
+                }),
+                {
+                    loading: 'Editing...',
+                    success: (res) => {
+                        console.log(values);
+                        navigate('/dashboard/product');
+                        return res.data.message;
+                    },
+                    error: (err) => err?.response?.data?.message || 'Something went wrong',
                 },
-                error: (err) => err?.response?.data?.message || 'Something went wrong',
-            });
+            );
         },
     });
 

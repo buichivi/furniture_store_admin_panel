@@ -1,4 +1,5 @@
 import { EditProductForm } from '@/components';
+import useAuthStore from '@/stores/authStore';
 import apiRequest from '@/utils/apiRequest';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { InboxIcon, PencilIcon } from '@heroicons/react/24/solid';
@@ -11,6 +12,7 @@ const TABLE_HEAD = ['Name', 'Image preview', 'Colors', 'Category', 'Price', 'Act
 
 export function Product() {
     const [products, setProducts] = useState([]);
+    const { token } = useAuthStore();
 
     useEffect(() => {
         apiRequest
@@ -23,19 +25,26 @@ export function Product() {
     }, []);
 
     const handleActiveProduct = (e, id) => {
-        toast.promise(apiRequest.patch('/products/' + id, { active: e.target.checked }), {
-            loading: 'Updating...',
-            success: (res) => {
-                return res.data.message;
+        toast.promise(
+            apiRequest.patch(
+                '/products/' + id,
+                { active: e.target.checked },
+                { headers: { Authorization: 'Bearer ' + token } },
+            ),
+            {
+                loading: 'Updating...',
+                success: (res) => {
+                    return res.data.message;
+                },
+                error: (err) => {
+                    return err.response.data.error || 'Something went wrong';
+                },
             },
-            error: (err) => {
-                return err.response.data.error || 'Something went wrong';
-            },
-        });
+        );
     };
 
     const handleDeleteProduct = (e, id) => {
-        toast.promise(apiRequest.delete('/products/' + id), {
+        toast.promise(apiRequest.delete('/products/' + id, { headers: { Authorization: 'Bearer ' + token } }), {
             loading: 'Deleting...',
             success: (res) => {
                 setProducts((products) => products.filter((prod) => prod._id != id));

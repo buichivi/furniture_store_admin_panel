@@ -7,8 +7,11 @@ import 'react-datepicker/dist/react-datepicker.css';
 import toast from 'react-hot-toast';
 import apiRequest from '@/utils/apiRequest';
 import PropTypes from 'prop-types';
+import useAuthStore from '@/stores/authStore';
 
 const EditPromoCode = ({ promoCode, setPromoCodes }) => {
+    const { token } = useAuthStore();
+
     const editPromoCode = useFormik({
         initialValues: {
             code: promoCode?.code,
@@ -43,18 +46,25 @@ const EditPromoCode = ({ promoCode, setPromoCodes }) => {
             maxUsage: Yup.number().min(1, 'Max usage must be at least 1').required('This field is required'),
         }),
         onSubmit: (values, { resetForm }) => {
-            toast.promise(apiRequest.put('/promo-code/' + promoCode._id, values), {
-                loading: 'Updating...',
-                success: (res) => {
-                    setPromoCodes((promoCodes) =>
-                        promoCodes.map((promo) => (promo._id == promoCode._id ? { ...promo, ...values } : promo)),
-                    );
-                    return res.data?.message;
+            toast.promise(
+                apiRequest.put('/promo-code/' + promoCode._id, values, {
+                    headers: {
+                        Authorization: `Bearer ` + token,
+                    },
+                }),
+                {
+                    loading: 'Updating...',
+                    success: (res) => {
+                        setPromoCodes((promoCodes) =>
+                            promoCodes.map((promo) => (promo._id == promoCode._id ? { ...promo, ...values } : promo)),
+                        );
+                        return res.data?.message;
+                    },
+                    error: (err) => {
+                        return err.response.data.error;
+                    },
                 },
-                error: (err) => {
-                    return err.response.data.error;
-                },
-            });
+            );
         },
     });
 

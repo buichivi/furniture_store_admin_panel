@@ -7,12 +7,13 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import useAuthStore from '@/stores/authStore';
 
 const TABLE_HEAD = ['Name', 'Description', 'Created at', 'Active', 'Action'];
 
 export function Brand() {
     const [brands, setBrands] = useState([]);
-    const token = localStorage.getItem('token');
+    const { token } = useAuthStore();
     useEffect(() => {
         apiRequest
             .get('/brands')

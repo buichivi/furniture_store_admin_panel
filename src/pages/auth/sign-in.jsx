@@ -10,7 +10,7 @@ import * as Yup from 'yup';
 export function SignIn() {
     const navigate = useNavigate();
     const { loginUser, setToken } = useAuthStore();
-    const token = localStorage.getItem('token');
+    const { token } = useAuthStore();
 
     useEffect(() => {
         apiRequest

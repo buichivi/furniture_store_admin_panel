@@ -1,3 +1,4 @@
+import useAuthStore from '@/stores/authStore';
 import useCategoryStore from '@/stores/categoryStore';
 import apiRequest from '@/utils/apiRequest';
 import { PencilIcon } from '@heroicons/react/24/solid';
@@ -12,6 +13,7 @@ const EditCategoryForm = ({ category = {}, index = {} }) => {
     const { categories, setCategories } = useCategoryStore();
     const previewCateImage = useRef();
     const { _id, name, imageUrl, description, parentId } = category;
+    const { token } = useAuthStore();
 
     // Handle edit category
 
@@ -34,17 +36,24 @@ const EditCategoryForm = ({ category = {}, index = {} }) => {
             for (const key in values) {
                 formData.append(key, values[key]);
             }
-            toast.promise(apiRequest.put('/categories/' + _id, formData), {
-                loading: 'Updating...',
-                success: (res) => {
-                    setCategories(categories.map((cate) => (cate._id === _id ? res.data.category : cate)));
-                    return res.data.message;
+            toast.promise(
+                apiRequest.put('/categories/' + _id, formData, {
+                    headers: {
+                        Authorization: `Bearer ` + token,
+                    },
+                }),
+                {
+                    loading: 'Updating...',
+                    success: (res) => {
+                        setCategories(categories.map((cate) => (cate._id === _id ? res.data.category : cate)));
+                        return res.data.message;
+                    },
+                    error: (err) => {
+                        console.log(err);
+                        return err.response.data.error || 'Something went wrong';
+                    },
                 },
-                error: (err) => {
-                    console.log(err);
-                    return err.response.data.error || 'Something went wrong';
-                },
-            });
+            );
         },
     });
     return (
