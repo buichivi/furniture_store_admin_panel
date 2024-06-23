@@ -6,6 +6,7 @@ import {
     InboxIcon,
     TicketIcon,
     ClipboardDocumentListIcon,
+    TagIcon,
 } from '@heroicons/react/24/solid';
 import {
     Home,
@@ -17,6 +18,7 @@ import {
     Brand,
     CategoryTree,
     PromoCode,
+    Tag,
 } from '@/pages/dashboard';
 import { SignIn, SignUp } from '@/pages/auth';
 import { AddColor, AddProduct, EditCategoryForm, EditColor, EditOrder, EditProductForm } from './components';
@@ -48,6 +50,12 @@ export const routes = [
                 name: 'brand',
                 path: '/brand',
                 element: <Brand />,
+            },
+            {
+                icon: <TagIcon {...icon} />,
+                name: 'tag',
+                path: '/tag',
+                element: <Tag />,
             },
             {
                 icon: <InboxIcon {...icon} />,
