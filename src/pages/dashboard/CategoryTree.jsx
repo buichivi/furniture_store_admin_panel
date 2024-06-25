@@ -1,7 +1,7 @@
 import { EyeIcon, EyeSlashIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Button, Card, IconButton, Tooltip, Typography, useTabs } from '@material-tailwind/react';
 import useCategoryStore from '@/stores/categoryStore';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import apiRequest from '@/utils/apiRequest';
 import toast from 'react-hot-toast';
 import { EditCategoryForm } from '@/components';
@@ -27,6 +27,7 @@ const getCategoryTree = (categories) => {
 export const CategoryTree = () => {
     const { token } = useAuthStore();
     const { categories, setCategories } = useCategoryStore();
+    const addCateBtn = useRef();
 
     useEffect(() => {
         apiRequest
@@ -60,6 +61,7 @@ export const CategoryTree = () => {
                     success: (res) => {
                         setCategories([...categories, res.data.category]);
                         resetForm();
+                        addCateBtn.current.nextElementSibling.click();
                         return res.data.message;
                     },
                     error: (err) => {
@@ -197,17 +199,15 @@ export const CategoryTree = () => {
                             </div>
                         </div>
                         <div className="mt-6 flex items-center justify-center gap-4">
-                            <Button color="cyan" variant="outlined" type="submit">
+                            <Button color="cyan" variant="outlined" type="submit" ref={addCateBtn}>
                                 Add
                             </Button>
-                            <Button color="red" className="relative">
-                                <label
-                                    htmlFor="add-cate"
-                                    className="absolute left-0 top-0 size-full"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                    }}
-                                ></label>
+                            <label htmlFor="add-cate" className="hidden"></label>
+                            <Button
+                                color="red"
+                                className="relative"
+                                onClick={(e) => e.currentTarget.previousElementSibling.click()}
+                            >
                                 Close
                             </Button>
                         </div>

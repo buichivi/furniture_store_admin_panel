@@ -162,7 +162,7 @@ const EditColor = () => {
                                 name="stock"
                                 value={editColorForm.values.stock}
                                 onChange={editColorForm.handleChange}
-                                placeholder="Price"
+                                placeholder="Quantity"
                                 className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-all focus:border-b-black"
                             />
                         </div>

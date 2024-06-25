@@ -20,15 +20,17 @@ const Tag = () => {
     }, []);
 
     const handleAddTag = () => {
-        toast.promise(apiRequest.post('/tags', { name }, { headers: { Authorization: 'Bearer ' + token } }), {
-            loading: 'Creating...',
-            success: (res) => {
-                setTags((tags) => [...tags, res.data?.tag]);
-                setName('');
-                return res.data?.message;
-            },
-            error: (err) => err?.response?.data?.error,
-        });
+        if (name) {
+            toast.promise(apiRequest.post('/tags', { name }, { headers: { Authorization: 'Bearer ' + token } }), {
+                loading: 'Creating...',
+                success: (res) => {
+                    setTags((tags) => [...tags, res.data?.tag]);
+                    setName('');
+                    return res.data?.message;
+                },
+                error: (err) => err?.response?.data?.error,
+            });
+        }
     };
 
     return (
