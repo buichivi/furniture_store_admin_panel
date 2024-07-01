@@ -7,6 +7,8 @@ import {
     TicketIcon,
     ClipboardDocumentListIcon,
     TagIcon,
+    AdjustmentsHorizontalIcon,
+    AtSymbolIcon,
 } from '@heroicons/react/24/solid';
 import {
     Home,
@@ -19,9 +21,11 @@ import {
     CategoryTree,
     PromoCode,
     Tag,
+    SliderAndBanner,
+    Blog,
 } from '@/pages/dashboard';
 import { SignIn, SignUp } from '@/pages/auth';
-import { AddColor, AddProduct, EditCategoryForm, EditColor, EditOrder, EditProductForm } from './components';
+import { AddBlog, AddColor, AddProduct, EditCategoryForm, EditColor, EditOrder, EditProductForm } from './components';
 import { element } from 'prop-types';
 import Order from './pages/dashboard/order';
 
@@ -75,6 +79,19 @@ export const routes = [
                 path: '/order',
                 element: <Order />,
             },
+            {
+                icon: <AdjustmentsHorizontalIcon {...icon} />,
+                name: 'Slider and banner',
+                path: '/slider-and-banner',
+                element: <SliderAndBanner />,
+            },
+            {
+                icon: <AtSymbolIcon {...icon} />,
+                name: 'Blog',
+                path: '/blog',
+                element: <Blog />,
+            },
+
             // {
             //     icon: <UserCircleIcon {...icon} />,
             //     name: 'profile',
@@ -128,6 +145,10 @@ const subRoutes = [
     {
         path: '/order/edit/:id',
         element: <EditOrder />,
+    },
+    {
+        path: '/blog/create',
+        element: <AddBlog />,
     },
 ];
 

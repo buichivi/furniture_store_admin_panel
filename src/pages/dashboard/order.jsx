@@ -1,12 +1,14 @@
 import useAuthStore from '@/stores/authStore';
 import apiRequest from '@/utils/apiRequest';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { FunnelIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { Button, Card, IconButton, Tooltip, Typography } from '@material-tailwind/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
+import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
+import DatePicker from 'react-datepicker';
+import moment from 'moment';
 
-const TABLE_HEAD = ['Order ID', 'Customer', 'Date', 'Total', 'Order Status', 'Payment status', 'Payment', 'Action'];
 const ORDER_STATUS = [
     { status: 'pending', color: 'orange' },
     { status: 'completed', color: '#06D001' },
@@ -20,12 +22,16 @@ const ORDER_STATUS = [
 const Order = () => {
     const { token } = useAuthStore();
     const [orders, setOrders] = useState([]);
-    const navigate = useNavigate();
+    const [filterOrders, setFilterOrders] = useState([]);
+    const tableGrid = useRef();
 
     useEffect(() => {
         apiRequest
             .get('/orders', { headers: { Authorization: 'Bearer ' + token } })
-            .then((res) => setOrders(res.data?.orders))
+            .then((res) => {
+                setOrders(res.data?.orders);
+                setFilterOrders(res.data?.orders);
+            })
             .catch((err) => console.log(err));
     }, []);
 
@@ -42,105 +48,317 @@ const Order = () => {
     };
 
     return (
-        <Card className="mt-4 h-full w-full overflow-scroll">
-            <table>
-                <thead>
-                    <tr>
-                        {TABLE_HEAD.map((head) => (
-                            <th key={head} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4 text-left">
-                                <Typography
-                                    variant="small"
-                                    color="blue-gray"
-                                    className="font-normal leading-none opacity-70"
-                                >
-                                    {head}
-                                </Typography>
-                            </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {orders.map((order, index) => {
-                        const isLast = index === orders.length - 1;
-                        const orderStatusColor = ORDER_STATUS.find(
-                            (orderStatus) => orderStatus.status == order.orderStatus,
-                        ).color;
-                        const classes = `text-sm ` + (isLast ? 'p-4' : 'p-4 border-b border-blue-gray-50');
-                        return (
-                            <tr>
-                                <td className={`${classes} font-semibold`}>#{order._id}</td>
-                                <td className={classes}>{order?.user?.firstName + ' ' + order?.user?.lastName}</td>
-                                <td className={classes}>{order?.createdAt}</td>
-                                <td className={classes}>${order?.totalAmount}</td>
-                                <td className={`${classes} capitalize`} style={{ color: orderStatusColor }}>
-                                    {order?.orderStatus}
-                                </td>
-                                <td
-                                    className={`${classes} capitalize`}
-                                    style={{
-                                        color: order?.paymentStatus == 'paid' ? '#00ec00' : 'orange',
-                                    }}
-                                >
-                                    {order?.paymentStatus}
-                                </td>
-                                <td className={`${classes} uppercase`}>{order?.paymentMethod}</td>
-                                <td className={classes}>
-                                    <Link to={`/dashboard/order/edit/${order?._id}`}>
-                                        <Tooltip content="Edit">
-                                            <IconButton variant="text">
-                                                <PencilIcon className="size-4" />
-                                            </IconButton>
-                                        </Tooltip>
-                                    </Link>
+        <div className="mt-4 h-full w-full">
+            <div className="flex items-center justify-between">
+                <input
+                    className="max-w-1/2 mb-4 min-w-[300px] rounded-md border-2 p-2 text-sm outline-none transition-colors focus:border-black"
+                    placeholder="Search..."
+                    onChange={(e) => {
+                        if (tableGrid.current) {
+                            tableGrid.current.api.setQuickFilter(e.target.value);
+                        }
+                    }}
+                />
+                <div className="relative">
+                    <Button
+                        variant="outlined"
+                        size="sm"
+                        className="flex items-center gap-2"
+                        onClick={(e) => {
+                            const ip = e.currentTarget.nextElementSibling;
+                            ip.checked = !ip.checked;
+                        }}
+                    >
+                        <FunnelIcon className="size-5" />
+                        <span>Filters</span>
+                    </Button>
+                    <input
+                        type="checkbox"
+                        id="filter-order"
+                        className="hidden [&:checked+div]:pointer-events-auto [&:checked+div]:translate-y-0  [&:checked+div]:opacity-100"
+                    />
+                    <Filter
+                        orders={orders}
+                        onFilter={({ customerName, orderStatus, paymentMethod, fromDate, toDate }) => {
+                            setFilterOrders((filterOrders) => {
+                                return filterOrders.filter((order) => {
+                                    // Lấy thông tin khách hàng và chuyển thành chuỗi
+                                    const cusName = `${order?.user?.firstName ?? ''} ${order?.user?.lastName ?? ''}`
+                                        .trim()
+                                        .toLowerCase();
+                                    const filterCusName = customerName ? customerName.toLowerCase() : null;
+
+                                    // Lấy thời gian tạo đơn hàng dưới dạng timestamp
+                                    const orderCreatedAtTime = new Date(order?.createdAt).getTime();
+
+                                    console.log(orderCreatedAtTime, new Date(fromDate).getTime());
+
+                                    // Kiểm tra từng điều kiện, nếu điều kiện đó có giá trị thì so sánh, ngược lại bỏ qua
+                                    const matchesCustomerName = filterCusName ? cusName === filterCusName : true;
+                                    const matchesOrderStatus = orderStatus ? order?.orderStatus === orderStatus : true;
+                                    const matchesPaymentMethod = paymentMethod
+                                        ? order?.paymentMethod === paymentMethod
+                                        : true;
+                                    const matchesFromDate = fromDate
+                                        ? orderCreatedAtTime >= new Date(fromDate).getTime()
+                                        : true;
+                                    const matchesToDate = toDate
+                                        ? orderCreatedAtTime <= new Date(toDate).getTime()
+                                        : true;
+
+                                    // Tất cả các điều kiện phải thỏa mãn
+                                    return (
+                                        matchesCustomerName &&
+                                        matchesOrderStatus &&
+                                        matchesPaymentMethod &&
+                                        matchesFromDate &&
+                                        matchesToDate
+                                    );
+                                });
+                            });
+                        }}
+                        onReset={() => {
+                            setFilterOrders(orders);
+                        }}
+                    />
+                </div>
+            </div>
+            <div
+                className="ag-theme-quartz" // applying the grid theme
+                style={{ height: 500 }} // the grid will fill the size of the parent container
+            >
+                <AgGridReact
+                    ref={tableGrid}
+                    rowData={filterOrders}
+                    columnDefs={[
+                        { field: '_id', headerName: 'Order Id', flex: 2 },
+                        {
+                            headerName: 'Customer',
+                            field: 'customer',
+                            valueFormatter: ({ data }) => {
+                                return `${data.user?.firstName} ${data.user?.lastName}`;
+                            },
+                        },
+                        {
+                            field: 'createdAt',
+                            headerName: 'Date',
+                            valueFormatter: ({ data }) => {
+                                return moment(data.createdAt).format('DD/MM/YYYY HH:mm');
+                            },
+                        },
+                        {
+                            field: 'totalAmount',
+                            headerName: 'Total',
+                            valueFormatter: ({ data }) => {
+                                return '$' + data.totalAmount;
+                            },
+                        },
+                        {
+                            field: 'orderStatus',
+                            headerName: 'Order Status',
+                            cellClass: 'capitalize',
+                            cellRenderer: ({ data }) => {
+                                return (
                                     <span
-                                        onClick={(e) => {
-                                            const inputDelete = e.currentTarget.nextElementSibling;
-                                            inputDelete.checked = !inputDelete.checked;
+                                        style={{
+                                            color: ORDER_STATUS.find((ot) => ot.status == data.orderStatus).color,
                                         }}
                                     >
-                                        <Tooltip content="Delete Brand">
-                                            <IconButton variant="text" className="ml-2 hover:text-red-600">
-                                                <TrashIcon className="h-4 w-4 " />
-                                            </IconButton>
-                                        </Tooltip>
+                                        {data.orderStatus}
                                     </span>
-                                    <input
-                                        type="checkbox"
-                                        id={`delete-order-${index}`}
-                                        className="hidden [&:checked+div]:flex"
-                                    />
-                                    <div className="fixed left-0 top-0 z-50 hidden h-full w-full items-center justify-center">
-                                        <label
-                                            htmlFor={`delete-order-${index}`}
-                                            className="absolute left-0 top-0 h-full w-full bg-[#000000a1]"
-                                        ></label>
-                                        <Card className="h-auto min-w-[50%] px-4 py-6">
-                                            <h3 className="text-left font-semibold">Confirm Delete</h3>
-                                            <p className="mt-2 text-sm">Are you sure you want to delete this order?</p>
-                                            <div className="mt-10 flex items-center justify-center gap-10">
-                                                <Button
-                                                    color="red"
-                                                    onClick={(e) => {
-                                                        e.currentTarget.nextElementSibling.click();
-                                                        handleDeleteOrder(order?._id);
-                                                    }}
-                                                >
-                                                    Delete
-                                                </Button>
-                                                <label htmlFor={`delete-order-${index}`} className="hidden"></label>
-                                                <Button onClick={(e) => e.currentTarget.previousElementSibling.click()}>
-                                                    Cancel
-                                                </Button>
-                                            </div>
-                                        </Card>
+                                );
+                            },
+                        },
+                        {
+                            field: 'paymentMethod',
+                            headerName: 'Payment Method',
+                            cellClass: 'uppercase',
+                        },
+                        {
+                            field: 'paymentStatus',
+                            headerName: 'Payment Status',
+                            cellClass: 'capitalize',
+                        },
+                        {
+                            field: 'action',
+                            headerName: 'Action',
+                            cellRenderer: ({ data: order }) => {
+                                return (
+                                    <div className="flex items-center justify-center px-2 py-1">
+                                        <Link to={`/dashboard/order/edit/${order?._id}`}>
+                                            <Tooltip content="Edit">
+                                                <IconButton variant="text">
+                                                    <PencilIcon className="size-4" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Link>
+                                        <span
+                                            onClick={() => {
+                                                if (confirm('Are you sure to delete this order?')) {
+                                                    handleDeleteOrder(order?._id);
+                                                }
+                                            }}
+                                        >
+                                            <Tooltip content="Delete Brand">
+                                                <IconButton variant="text" className="ml-2 hover:text-red-600">
+                                                    <TrashIcon className="h-4 w-4 " />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </span>
                                     </div>
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
-        </Card>
+                                );
+                            },
+                            flex: 1.3,
+                        },
+                    ]}
+                    pagination={true}
+                    paginationPageSize={10}
+                    paginationPageSizeSelector={[10, 15, 20, 25]}
+                    className=""
+                    defaultColDef={{ flex: 1, autoHeight: true }}
+                    columnMenu="new"
+                />
+            </div>
+        </div>
+    );
+};
+
+const Filter = ({ orders, onFilter, onReset }) => {
+    const [fromDate, setFromDate] = useState();
+    const [toDate, setToDate] = useState();
+    const [customerName, setCustomerName] = useState('');
+    const [orderStatus, setOrderStatus] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('');
+
+    const customerNames = useMemo(() => {
+        const customersSet = new Set();
+        for (const order of orders) {
+            if (!customersSet.has(order?.user?.firstName + ' ' + order?.user?.lastName)) {
+                console.log(order?.user?.firstName + ' ' + order?.user?.lastName);
+                customersSet.add(order?.user?.firstName + ' ' + order?.user?.lastName);
+            }
+        }
+        return Array.from(customersSet);
+    }, [orders]);
+
+    const orderStatuses = useMemo(() => {
+        const orderStatusSet = new Set();
+        for (const order of orders) {
+            if (!orderStatusSet.has(order?.orderStatus)) {
+                orderStatusSet.add(order?.orderStatus);
+            }
+        }
+        return Array.from(orderStatusSet);
+    }, [orders]);
+    const paymentMethods = useMemo(() => {
+        const paymentMethodsSet = new Set();
+        for (const order of orders) {
+            if (!paymentMethodsSet.has(order?.paymentMethod)) {
+                paymentMethodsSet.add(order?.paymentMethod);
+            }
+        }
+        return Array.from(paymentMethodsSet);
+    }, [orders]);
+
+    const handleFilter = () => {
+        onFilter({ customerName, orderStatus, paymentMethod, fromDate, toDate });
+    };
+    const handleReset = () => {
+        onReset();
+        setCustomerName('');
+        setOrderStatus('');
+        setPaymentMethod('');
+        setFromDate();
+        setToDate();
+    };
+
+    return (
+        <div className="top-ful pointer-events-none absolute right-0 z-50 mt-2 min-h-[300px] w-[400px] translate-y-10 rounded-md border bg-white text-sm opacity-0 shadow-lg transition-all duration-500">
+            <div className="p-4">
+                <div className="*:block">
+                    <span>Customer</span>
+                    <select
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.currentTarget.value)}
+                        className="mt-2 w-full rounded-md border-2 p-1 outline-none transition-colors focus:border-black"
+                    >
+                        <option value="">Select customer name</option>
+                        {customerNames.map((name, index) => {
+                            return (
+                                <option key={index} value={name}>
+                                    {name}
+                                </option>
+                            );
+                        })}
+                    </select>
+                </div>
+                <div className="mt-4 *:block">
+                    <span>Order Status</span>
+                    <select
+                        value={orderStatus}
+                        onChange={(e) => setOrderStatus(e.currentTarget.value)}
+                        className="mt-2 w-full rounded-md border-2 p-1 capitalize outline-none transition-colors focus:border-black"
+                    >
+                        <option value="">Select order status</option>
+                        {orderStatuses.map((name, index) => {
+                            return (
+                                <option key={index} value={name}>
+                                    {name}
+                                </option>
+                            );
+                        })}
+                    </select>
+                </div>
+                <div className="mt-4 *:block">
+                    <span>Payment Methods</span>
+                    <select
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.currentTarget.value)}
+                        className="mt-2 w-full rounded-md border-2 p-1 outline-none transition-colors focus:border-black"
+                    >
+                        <option value="">Select payment method</option>
+                        {paymentMethods.map((name, index) => {
+                            return (
+                                <option key={index} value={name} className="uppercase">
+                                    {name}
+                                </option>
+                            );
+                        })}
+                    </select>
+                </div>
+                <div className="mt-4 *:block">
+                    <span>From</span>
+                    <DatePicker
+                        selected={fromDate}
+                        onChange={(date) => {
+                            setFromDate(date);
+                        }}
+                        dateFormat={'dd/MM/YYYY'}
+                        placeholderText="From"
+                        className="mt-2 w-full rounded-md border-2 p-1 outline-none transition-colors focus:border-black"
+                    />
+                </div>
+                <div className="mt-4 *:block">
+                    <span>To</span>
+                    <DatePicker
+                        selected={toDate}
+                        onChange={(date) => {
+                            setToDate(date);
+                        }}
+                        minDate={fromDate}
+                        dateFormat={'dd/MM/YYYY'}
+                        placeholderText="From"
+                        className="mt-2 w-full rounded-md border-2 p-1 outline-none transition-colors focus:border-black"
+                    />
+                </div>
+                <div className="mt-4 flex items-center justify-center gap-4">
+                    <Button variant="outlined" onClick={handleReset}>
+                        Reset
+                    </Button>
+                    <Button onClick={handleFilter}>Save changes</Button>
+                </div>
+            </div>
+        </div>
     );
 };
 

@@ -4,6 +4,7 @@ import { ArrowLeftIcon, BookmarkIcon } from '@heroicons/react/24/solid';
 import { Button, Card, IconButton, Input, Option, Select, Textarea, Tooltip } from '@material-tailwind/react';
 import axios from 'axios';
 import { useFormik } from 'formik';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -87,7 +88,7 @@ const EditOrder = () => {
             <Card className="mt-4 min-h-10 p-4">
                 <div className="flex items-center gap-10">
                     <h3 className="font-bold text-black">Order ID: #{order?._id}</h3>
-                    <p>Order date: {order?.createdAt}</p>
+                    <p>Order date: {moment(order?.createdAt).format('DD/MM/YYYY HH:mm')}</p>
                 </div>
                 <div className="mt-4 flex w-full items-center gap-10">
                     <div className="flex flex-1 items-center gap-2">
@@ -97,6 +98,7 @@ const EditOrder = () => {
                             name="orderStatus"
                             value={orderInfoForm.values.orderStatus}
                             onChange={orderInfoForm.handleChange}
+                            disabled={order?.orderStatus == 'completed'}
                         >
                             {['pending', 'failed', 'processing', 'shipped', 'delivered', 'cancelled', 'completed'].map(
                                 (status) => {
@@ -116,6 +118,7 @@ const EditOrder = () => {
                             className="w-full rounded-md border-2 p-2 text-sm capitalize transition-colors focus:border-black"
                             value={orderInfoForm.values.paymentStatus}
                             onChange={orderInfoForm.handleChange}
+                            disabled={order?.paymentStatus == 'paid'}
                         >
                             {['paid', 'unpaid'].map((status) => {
                                 return (

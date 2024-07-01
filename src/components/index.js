@@ -8,3 +8,5 @@ export { default as AddPromoCode } from './AddPromoCode';
 export { default as EditPromoCode } from './EditPromoCode';
 export { default as DeletePromoCode } from './DeletePromoCode';
 export { default as EditOrder } from './EditOrder';
+export { default as EditSliderForm } from './EditSlider';
+export { default as AddBlog } from './AddBlog';

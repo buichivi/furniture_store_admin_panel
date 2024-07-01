@@ -225,7 +225,6 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
     const { dragCate, setDragCate, moveCate, categories, setCategories } = useCategoryStore();
     const [drop, setDrop] = useState(false);
     const { token } = useAuthStore();
-    console.log(category, drag);
 
     const handleDeleteCate = (id) => {
         toast.promise(apiRequest.delete('/categories/' + id, { headers: { Authorization: 'Bearer ' + token } }), {
@@ -246,7 +245,7 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
     };
     return (
         <div
-            className={`${className} border-2 border-dotted ${
+            className={`${className} w-fit cursor-grab border-2 border-dotted ${
                 category?.parentId == '' && drop ? '!border-black' : '!border-transparent'
             }`}
             onDragOver={(e) => {
@@ -258,6 +257,7 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
             }}
             onDrop={() => {
                 if (category.parentId == '') {
+                    console.log(dragCate);
                     toast.promise(
                         apiRequest.patch(
                             '/categories/' + dragCate._id,
@@ -277,7 +277,7 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
                 }
             }}
         >
-            <div className="relative mb-4 flex items-stretch gap-2">
+            <div className="relative mb-4 flex w-fit items-stretch gap-2">
                 {isParent && (
                     <div className="flex items-center">
                         <span>------</span>
@@ -293,7 +293,11 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
                     draggable={drag}
                     onDragStart={() => setDragCate(category)}
                 >
-                    <div className="flex min-h-5 min-w-[200px] cursor-default items-center justify-between gap-2 rounded-md bg-white p-2 text-black shadow-lg">
+                    <div
+                        className={`flex min-h-5 min-w-[200px] cursor-default items-center justify-between gap-2 rounded-md bg-white p-2 text-black shadow-lg ${
+                            drag ? 'cursor-grab' : 'cursor-auto'
+                        }`}
+                    >
                         {category?.name}
                         <div className="flex items-center gap-2">
                             <span

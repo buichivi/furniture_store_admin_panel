@@ -3,13 +3,12 @@ import { Card, Button, Select, Option } from '@material-tailwind/react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import toast from 'react-hot-toast';
 import apiRequest from '@/utils/apiRequest';
 import PropTypes from 'prop-types';
 import useAuthStore from '@/stores/authStore';
 
-const EditPromoCode = ({ promoCode, setPromoCodes }) => {
+const EditPromoCode = ({ promoCode, setPromoCodes, setIsEdit }) => {
     const { token } = useAuthStore();
 
     const editPromoCode = useFormik({
@@ -45,7 +44,7 @@ const EditPromoCode = ({ promoCode, setPromoCodes }) => {
                 .min(Yup.ref('startDate'), 'End date cannot be before start date'),
             maxUsage: Yup.number().min(1, 'Max usage must be at least 1').required('This field is required'),
         }),
-        onSubmit: (values, { resetForm }) => {
+        onSubmit: (values) => {
             toast.promise(
                 apiRequest.put('/promo-code/' + promoCode._id, values, {
                     headers: {
@@ -55,6 +54,7 @@ const EditPromoCode = ({ promoCode, setPromoCodes }) => {
                 {
                     loading: 'Updating...',
                     success: (res) => {
+                        setIsEdit(false);
                         setPromoCodes((promoCodes) =>
                             promoCodes.map((promo) => (promo._id == promoCode._id ? { ...promo, ...values } : promo)),
                         );
@@ -70,12 +70,11 @@ const EditPromoCode = ({ promoCode, setPromoCodes }) => {
 
     return (
         <>
-            <input type="checkbox" className="hidden [&:checked+div]:flex" id={`edit-promo-code-${promoCode._id}`} />
-            <div className="fixed left-0 top-0 z-50 hidden size-full items-center justify-center">
-                <label
-                    htmlFor={`edit-promo-code-${promoCode._id}`}
+            <div className="fixed left-0 top-0 z-50 flex size-full items-center justify-center">
+                <span
+                    onClick={() => setIsEdit(false)}
                     className="absolute left-0 top-0 size-full bg-[#0000009a]"
-                ></label>
+                ></span>
                 <Card className="min-w-[50%] p-8">
                     <h3 className="font-semibold text-black">Edit promo code</h3>
                     <form onSubmit={editPromoCode.handleSubmit}>
@@ -187,17 +186,8 @@ const EditPromoCode = ({ promoCode, setPromoCodes }) => {
                             />
                         </div>
                         <div className="mt-6 flex items-center justify-center gap-6">
-                            <Button
-                                type="submit"
-                                onClick={(e) => {
-                                    if (!Object.keys(editPromoCode.errors).length)
-                                        e.currentTarget.nextElementSibling.click();
-                                }}
-                            >
-                                Edit
-                            </Button>
-                            <label htmlFor={`edit-promo-code-${promoCode._id}`} className="hidden"></label>
-                            <Button color="red" onClick={(e) => e.currentTarget.previousElementSibling.click()}>
+                            <Button type="submit">Edit</Button>
+                            <Button color="red" onClick={() => setIsEdit(false)}>
                                 Cancel
                             </Button>
                         </div>
@@ -211,6 +201,7 @@ const EditPromoCode = ({ promoCode, setPromoCodes }) => {
 EditPromoCode.propTypes = {
     promoCode: PropTypes.object,
     setPromoCodes: PropTypes.func,
+    setIsEdit: PropTypes.func,
 };
 
 export default EditPromoCode;

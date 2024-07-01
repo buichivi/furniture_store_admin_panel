@@ -1,18 +1,21 @@
 import { EditBrandForm } from '@/components';
 import apiRequest from '@/utils/apiRequest';
-import textShort from '@/utils/textShort';
-import { InboxIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
-import { Button, Card, IconButton, Switch, Tooltip, Typography } from '@material-tailwind/react';
-import { useEffect, useState } from 'react';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
+import { Button, Card, IconButton, Tooltip, Typography } from '@material-tailwind/react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import useAuthStore from '@/stores/authStore';
-
-const TABLE_HEAD = ['Name', 'Description', 'Created at', 'Active', 'Action'];
+import { AgGridReact } from 'ag-grid-react';
 
 export function Brand() {
     const [brands, setBrands] = useState([]);
+    const [editBrand, setEditBrand] = useState([]);
+    const [isEdit, setIsEdit] = useState(false);
+    const [isDelete, setIsDelete] = useState(false);
+    const tableGrid = useRef();
+
     const { token } = useAuthStore();
     useEffect(() => {
         apiRequest
@@ -21,29 +24,30 @@ export function Brand() {
             .catch((err) => console.log(err));
     }, []);
 
-    const handleChangeActiveBrand = (e, id) => {
-        toast.promise(
-            apiRequest.patch(
-                '/brands/' + id,
-                { active: e.target.checked },
-                { headers: { Authorization: 'Bearer ' + token } },
-            ),
-            {
-                loading: 'Updating...',
-                success: (res) => {
-                    return res.data.message;
-                },
-                error: (err) => {
-                    return err.response.data.error || 'Something went wrong';
-                },
-            },
-        );
-    };
+    // const handleChangeActiveBrand = (e, id) => {
+    //     toast.promise(
+    //         apiRequest.patch(
+    //             '/brands/' + id,
+    //             { active: e.target.checked },
+    //             { headers: { Authorization: 'Bearer ' + token } },
+    //         ),
+    //         {
+    //             loading: 'Updating...',
+    //             success: (res) => {
+    //                 return res.data.message;
+    //             },
+    //             error: (err) => {
+    //                 return err.response.data.error || 'Something went wrong';
+    //             },
+    //         },
+    //     );
+    // };
 
     const handleDeleteBrand = (id) => {
         toast.promise(apiRequest.delete('/brands/' + id, { headers: { Authorization: 'Bearer ' + token } }), {
             loading: 'Deleting...',
             success: (res) => {
+                setIsDelete(false);
                 setBrands((brands) => {
                     const newBrands = brands.filter((brand) => brand._id !== id);
                     return newBrands;
@@ -87,15 +91,25 @@ export function Brand() {
 
     return (
         <div className="py-6">
-            <Button
-                variant="gradient"
-                className="mb-4"
-                onClick={(e) => {
-                    e.currentTarget.nextElementSibling.checked = !e.currentTarget.nextElementSibling.checked;
-                }}
-            >
-                Add brand
-            </Button>
+            <div className="flex items-center justify-between">
+                <Button
+                    variant="gradient"
+                    onClick={(e) => {
+                        e.currentTarget.nextElementSibling.checked = !e.currentTarget.nextElementSibling.checked;
+                    }}
+                >
+                    Add brand
+                </Button>
+                <input
+                    className="max-w-1/2 min-w-[300px] rounded-md border-2 p-2 text-sm outline-none transition-colors focus:border-black"
+                    placeholder="Search..."
+                    onChange={(e) => {
+                        if (tableGrid.current) {
+                            tableGrid.current.api.setQuickFilter(e.target.value);
+                        }
+                    }}
+                />
+            </div>
             <input type="checkbox" id="add-brand" className="hidden [&:checked+div]:flex" />
             <div className="fixed left-0 top-0 z-50 hidden size-full items-center justify-center">
                 <label htmlFor="add-brand" className="absolute left-0 top-0 size-full bg-[#000b]"></label>
@@ -162,70 +176,26 @@ export function Brand() {
                     </form>
                 </Card>
             </div>
-            <Card className="h-full w-full overflow-scroll">
-                <table className="w-full min-w-max table-auto text-left">
-                    <thead>
-                        <tr>
-                            {TABLE_HEAD.map((head) => (
-                                <th key={head} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                                    <Typography
-                                        variant="small"
-                                        color="blue-gray"
-                                        className="font-normal leading-none opacity-70"
-                                    >
-                                        {head}
-                                    </Typography>
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {brands.length === 0 && (
-                            <tr>
-                                <td colSpan={TABLE_HEAD.length}>
-                                    <div className="flex min-h-[50vh] items-center justify-center opacity-50">
-                                        <InboxIcon className="size-5 text-black" />
-                                        <span className="ml-2 text-sm">Empty</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        )}
-                        {brands.map((brand, index) => {
-                            const { _id, name, description, createdAt, active } = brand;
-                            return (
-                                <tr key={name} className="even:bg-blue-gray-50/50">
-                                    <td className="p-4">
-                                        <Typography variant="small" color="blue-gray" className="font-normal">
-                                            {name}
-                                        </Typography>
-                                    </td>
-                                    <td className="p-4">
-                                        <Typography
-                                            variant="small"
-                                            color="blue-gray"
-                                            className="text-ellipsis font-normal"
-                                        >
-                                            {textShort(description)}
-                                        </Typography>
-                                    </td>
-                                    <td className="p-4">
-                                        <Typography variant="small" color="blue-gray" className="font-normal">
-                                            {createdAt}
-                                        </Typography>
-                                    </td>
-                                    <td className="p-4">
-                                        <Switch
-                                            color="green"
-                                            defaultChecked={active}
-                                            value={active}
-                                            onChange={(e) => handleChangeActiveBrand(e, _id)}
-                                        />
-                                    </td>
-                                    <td className="p-4">
+
+            <div
+                className="ag-theme-quartz mt-4" // applying the grid theme
+                style={{ height: 500 }} // the grid will fill the size of the parent container
+            >
+                <AgGridReact
+                    ref={tableGrid}
+                    rowData={brands}
+                    columnDefs={[
+                        { field: 'name' },
+                        { field: 'description', flex: 2 },
+                        {
+                            field: 'action',
+                            cellRenderer: ({ data: brand }) => {
+                                return (
+                                    <div>
                                         <span
-                                            onClick={(e) => {
-                                                const inputEdit = e.currentTarget.nextElementSibling;
-                                                inputEdit.checked = !inputEdit.checked;
+                                            onClick={() => {
+                                                setIsEdit(true);
+                                                setEditBrand(brand);
                                             }}
                                         >
                                             <Tooltip content="Edit Category">
@@ -234,22 +204,10 @@ export function Brand() {
                                                 </IconButton>
                                             </Tooltip>
                                         </span>
-                                        <input
-                                            type="checkbox"
-                                            className="hidden [&:checked+div]:block"
-                                            id={`edit-brand-${index}`}
-                                        />
-                                        <div className="fixed left-0 top-0 z-50 hidden h-full w-full">
-                                            <label
-                                                htmlFor={`edit-brand-${index}`}
-                                                className="block h-full w-full bg-[#000000a1]"
-                                            ></label>
-                                            <EditBrandForm brand={brand} index={index} setBrands={setBrands} />
-                                        </div>
                                         <span
-                                            onClick={(e) => {
-                                                const inputDelete = e.currentTarget.nextElementSibling;
-                                                inputDelete.checked = !inputDelete.checked;
+                                            onClick={() => {
+                                                setIsDelete(true);
+                                                setEditBrand(brand);
                                             }}
                                         >
                                             <Tooltip content="Delete Brand">
@@ -258,49 +216,55 @@ export function Brand() {
                                                 </IconButton>
                                             </Tooltip>
                                         </span>
-                                        <input
-                                            type="checkbox"
-                                            id={`delete-brand-${index}`}
-                                            className="hidden [&:checked+div]:flex"
-                                        />
-                                        <div className="fixed left-0 top-0 z-50 hidden h-full w-full items-center justify-center">
-                                            <label
-                                                htmlFor={`delete-brand-${index}`}
-                                                className="absolute left-0 top-0 h-full w-full bg-[#000000a1]"
-                                            ></label>
-                                            <Card className="h-auto min-w-[50%] px-4 py-6">
-                                                <h3 className="text-left font-semibold">Confirm Delete</h3>
-                                                <p className="mt-2 text-sm">
-                                                    Are you sure you want to delete the brand named "
-                                                    <span className="font-bold">{name}</span>"?
-                                                </p>
-                                                <div className="mt-10 flex items-center justify-center gap-10">
-                                                    <Button
-                                                        color="red"
-                                                        onClick={(e) => {
-                                                            e.currentTarget.nextElementSibling.children[0].click();
-                                                            handleDeleteBrand(_id);
-                                                        }}
-                                                    >
-                                                        Delete
-                                                    </Button>
-                                                    <Button className="relative">
-                                                        <label
-                                                            htmlFor={`delete-brand-${index}`}
-                                                            className="absolute left-0 top-0 size-full cursor-pointer"
-                                                        ></label>
-                                                        Cancel
-                                                    </Button>
-                                                </div>
-                                            </Card>
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </Card>
+                                    </div>
+                                );
+                            },
+                        },
+                    ]}
+                    pagination={true}
+                    paginationPageSize={10}
+                    paginationPageSizeSelector={[10, 15, 20, 25]}
+                    className="pb-5"
+                    defaultColDef={{
+                        flex: 1,
+                        autoHeight: true,
+                        cellClass: 'py-1',
+                    }}
+                />
+            </div>
+            {isEdit && (
+                <div className="fixed left-0 top-0 z-50 h-full w-full">
+                    <span onClick={() => setIsEdit(false)} className="block h-full w-full bg-[#000000a1]"></span>
+                    <EditBrandForm brand={editBrand} setBrands={setBrands} setIsEdit={setIsEdit} />
+                </div>
+            )}
+
+            {isDelete && (
+                <div className="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center">
+                    <span
+                        onClick={() => setIsDelete(false)}
+                        className="absolute left-0 top-0 h-full w-full bg-[#000000a1]"
+                    ></span>
+                    <Card className="h-auto min-w-[50%] px-4 py-6">
+                        <h3 className="text-left font-semibold">Confirm Delete</h3>
+                        <p className="mt-2 text-sm">
+                            Are you sure you want to delete the brand named "
+                            <span className="font-bold">{editBrand?.name}</span>"?
+                        </p>
+                        <div className="mt-10 flex items-center justify-center gap-10">
+                            <Button
+                                color="red"
+                                onClick={() => {
+                                    handleDeleteBrand(editBrand?._id);
+                                }}
+                            >
+                                Delete
+                            </Button>
+                            <Button onClick={() => setIsDelete(false)}>Cancel</Button>
+                        </div>
+                    </Card>
+                </div>
+            )}
         </div>
     );
 }

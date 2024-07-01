@@ -5,7 +5,7 @@ import { useFormik } from 'formik';
 import toast from 'react-hot-toast';
 import * as Yup from 'yup';
 
-const EditBrandForm = ({ brand = {}, index = {}, setBrands = () => {} }) => {
+const EditBrandForm = ({ brand, setBrands, setIsEdit }) => {
     const { _id, name, description } = brand;
     const { token } = useAuthStore();
 
@@ -30,6 +30,7 @@ const EditBrandForm = ({ brand = {}, index = {}, setBrands = () => {} }) => {
                 {
                     loading: 'Updating...',
                     success: (res) => {
+                        setIsEdit(false);
                         setBrands((brands) => {
                             const newBrand = brands.map((brand) => (brand._id === _id ? res.data.brand : brand));
                             return newBrand;
@@ -82,21 +83,10 @@ const EditBrandForm = ({ brand = {}, index = {}, setBrands = () => {} }) => {
                     ></textarea>
                 </label>
                 <div className="mt-6 flex items-center justify-center gap-4">
-                    <Button
-                        color="blue"
-                        variant="outlined"
-                        type="submit"
-                        onClick={(e) => {
-                            e.currentTarget.nextElementSibling.children[0].click();
-                        }}
-                    >
+                    <Button color="blue" variant="outlined" type="submit">
                         Save
                     </Button>
-                    <Button color="red" className="relative">
-                        <label
-                            htmlFor={`edit-brand-${index}`}
-                            className="absolute left-0 top-0 size-full cursor-pointer"
-                        ></label>
+                    <Button color="red" onClick={() => setIsEdit(false)}>
                         Close
                     </Button>
                 </div>
