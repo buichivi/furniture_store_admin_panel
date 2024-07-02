@@ -9,7 +9,6 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@ckeditor/ckeditor5-build-classic": "^42.0.0",
         "@ckeditor/ckeditor5-react": "^8.0.0",
         "@emotion/react": "^11.11.4",
         "@emotion/styled": "^11.11.5",
@@ -20,7 +19,6 @@
         "apexcharts": "3.44.0",
         "axios": "^1.6.8",
         "ckeditor5": "^42.0.0",
-        "ckeditor5-premium-features": "^42.0.0",
         "formik": "^2.4.6",
         "moment": "^2.30.1",
         "moment-timezone": "^0.5.45",
@@ -30,7 +28,6 @@
         "react-datepicker": "^6.9.0",
         "react-dom": "18.2.0",
         "react-hot-toast": "^2.4.1",
-        "react-quill": "^2.0.0",
         "react-router-dom": "6.17.0",
         "yup": "^1.4.0",
         "zustand": "^4.5.2"

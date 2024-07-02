@@ -1,42 +1,19 @@
 import apiRequest from '@/utils/apiRequest';
 import { Button, Card, IconButton, Tooltip } from '@material-tailwind/react';
 import { useEffect, useState } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import 'react-quill/dist/quill.bubble.css';
 import { Autocomplete, TextField } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
-import { ArrowLeftIcon, CloudArrowUpIcon, Square2StackIcon } from '@heroicons/react/24/outline';
+import {
+    ArrowLeftIcon,
+    CloudArrowUpIcon,
+    Square2StackIcon,
+} from '@heroicons/react/24/outline';
 import useAuthStore from '@/stores/authStore';
-
-const modules = {
-    toolbar: [
-        [{ header: [6, 5, 4, 3, 2, 1, false] }],
-        ['bold', 'italic', 'underline', 'blockquote'],
-        [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-        ['link'],
-        ['clean'],
-    ],
-};
-
-const formats = [
-    'header',
-    'font',
-    'size',
-    'bold',
-    'italic',
-    'underline',
-    'strike',
-    'blockquote',
-    'list',
-    'bullet',
-    'indent',
-    'video',
-];
+import { TextEditor } from '../components/CKEditor';
 
 const EditProductForm = () => {
     const [categories, setCategories] = useState([]);
@@ -47,7 +24,11 @@ const EditProductForm = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        Promise.all([apiRequest.get('/categories'), apiRequest.get('/tags'), apiRequest.get('/brands')]).then((res) => {
+        Promise.all([
+            apiRequest.get('/categories'),
+            apiRequest.get('/tags'),
+            apiRequest.get('/brands'),
+        ]).then((res) => {
             setCategories(res[0].data.categories);
             setTags(res[1].data.tags);
             setBrands(res[2].data.brands);
@@ -83,7 +64,9 @@ const EditProductForm = () => {
             brand: Yup.string().required('This field is required'),
             category: Yup.string().required('This field is required'),
             material: Yup.string().required('This field is required'),
-            tags: Yup.array().min(1, 'Product must have at least 1 tag').required('This field is required'),
+            tags: Yup.array()
+                .min(1, 'Product must have at least 1 tag')
+                .required('This field is required'),
             width: Yup.string().required('This field is required'),
             height: Yup.string().required('This field is required'),
             depth: Yup.string().required('This field is required'),
@@ -104,7 +87,10 @@ const EditProductForm = () => {
                     continue;
                 }
                 if (key == 'tags') {
-                    formData.append('tags', JSON.stringify(values.tags.map((tag) => tag._id)));
+                    formData.append(
+                        'tags',
+                        JSON.stringify(values.tags.map((tag) => tag._id)),
+                    );
                     continue;
                 }
                 formData.append(key, values[key]);
@@ -173,7 +159,9 @@ const EditProductForm = () => {
                             <div className="flex items-center justify-between">
                                 <span className="block text-sm font-medium">Name</span>
                                 {productForm.errors.name && (
-                                    <span className="text-sm text-red-500">{productForm.errors.name}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.name}
+                                    </span>
                                 )}
                             </div>
                             <input
@@ -187,23 +175,27 @@ const EditProductForm = () => {
                         </div>
                         <div className="mt-6">
                             <div className="flex items-center justify-between">
-                                <span className="block text-sm font-medium">Description</span>
+                                <span className="block text-sm font-medium">
+                                    Description
+                                </span>
                                 {productForm.errors.description && (
-                                    <span className="text-sm text-red-500">{productForm.errors.description}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.description}
+                                    </span>
                                 )}
                             </div>
-                            <ReactQuill
-                                modules={modules}
-                                formats={formats}
-                                theme="bubble"
-                                name="description"
-                                value={productForm.values.description}
-                                onChange={(value) => {
-                                    productForm.setFieldValue('description', value);
-                                }}
-                                placeholder="Description"
-                                className="mt-1 bg-white [&_.ql-editor]:min-h-[250px] [&_.ql-tooltip-arrow]:!left-[8%] [&_.ql-tooltip]:!left-0"
-                            />
+                            <div className="mt-2">
+                                <TextEditor
+                                    onChange={({ content }) => {
+                                        if (content) {
+                                            productForm.setFieldValue(
+                                                'description',
+                                                content,
+                                            );
+                                        }
+                                    }}
+                                />
+                            </div>
                         </div>
                     </Card>
                     <Card className="mt-4 flex-1 p-4">
@@ -212,9 +204,13 @@ const EditProductForm = () => {
                             <div className="flex-1">
                                 <div className="">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Width (cm)</span>
+                                        <span className="block text-sm font-medium">
+                                            Width (cm)
+                                        </span>
                                         {productForm.errors.width && (
-                                            <span className="text-sm text-red-500">{productForm.errors.width}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.width}
+                                            </span>
                                         )}
                                     </div>
                                     <input
@@ -229,9 +225,13 @@ const EditProductForm = () => {
                                 </div>
                                 <div className="mt-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Height (cm)</span>
+                                        <span className="block text-sm font-medium">
+                                            Height (cm)
+                                        </span>
                                         {productForm.errors.height && (
-                                            <span className="text-sm text-red-500">{productForm.errors.height}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.height}
+                                            </span>
                                         )}
                                     </div>
                                     <input
@@ -248,9 +248,13 @@ const EditProductForm = () => {
                             <div className="flex-1">
                                 <div className="">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Depth (cm)</span>
+                                        <span className="block text-sm font-medium">
+                                            Depth (cm)
+                                        </span>
                                         {productForm.errors.depth && (
-                                            <span className="text-sm text-red-500">{productForm.errors.depth}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.depth}
+                                            </span>
                                         )}
                                     </div>
                                     <input
@@ -265,9 +269,13 @@ const EditProductForm = () => {
                                 </div>
                                 <div className="mt-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Weight (kg)</span>
+                                        <span className="block text-sm font-medium">
+                                            Weight (kg)
+                                        </span>
                                         {productForm.errors.weight && (
-                                            <span className="text-sm text-red-500">{productForm.errors.weight}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.weight}
+                                            </span>
                                         )}
                                     </div>
                                     <input
@@ -290,7 +298,9 @@ const EditProductForm = () => {
                             <div className="flex items-center justify-between">
                                 <span className="block text-sm font-medium">SKU</span>
                                 {productForm.errors.SKU && (
-                                    <span className="text-sm text-red-500">{productForm.errors.SKU}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.SKU}
+                                    </span>
                                 )}
                             </div>
                             <input
@@ -304,9 +314,13 @@ const EditProductForm = () => {
                         </div>
                         <div className="mt-4">
                             <div className="flex items-center justify-between">
-                                <span className="block text-sm font-medium">Base price ($)</span>
+                                <span className="block text-sm font-medium">
+                                    Base price ($)
+                                </span>
                                 {productForm.errors.price && (
-                                    <span className="text-sm text-red-500">{productForm.errors.price}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.price}
+                                    </span>
                                 )}
                             </div>
                             <input
@@ -321,9 +335,13 @@ const EditProductForm = () => {
                         </div>
                         <div className="mt-6">
                             <div className="flex items-center justify-between">
-                                <span className="block text-sm font-medium">Discount (%)</span>
+                                <span className="block text-sm font-medium">
+                                    Discount (%)
+                                </span>
                                 {productForm.errors.discount && (
-                                    <span className="text-sm text-red-500">{productForm.errors.discount}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.discount}
+                                    </span>
                                 )}
                             </div>
                             <input
@@ -343,7 +361,9 @@ const EditProductForm = () => {
                             <div className="flex items-center justify-between">
                                 <span className="block text-sm font-medium">Brand</span>
                                 {productForm.errors.brand && (
-                                    <span className="text-sm text-red-500">{productForm.errors.brand}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.brand}
+                                    </span>
                                 )}
                             </div>
                             <div className="mt-4">
@@ -352,7 +372,10 @@ const EditProductForm = () => {
                                         name="brand"
                                         value={productForm.values.brand}
                                         onChange={(e) => {
-                                            productForm.setFieldValue('brand', e.currentTarget.value);
+                                            productForm.setFieldValue(
+                                                'brand',
+                                                e.currentTarget.value,
+                                            );
                                         }}
                                         className="w-full rounded-md border border-black px-2 py-2 outline-none"
                                     >
@@ -370,9 +393,13 @@ const EditProductForm = () => {
                         </div>
                         <div className="mt-6">
                             <div className="flex items-center justify-between">
-                                <span className="block text-sm font-medium">Category</span>
+                                <span className="block text-sm font-medium">
+                                    Category
+                                </span>
                                 {productForm.errors.category && (
-                                    <span className="text-sm text-red-500">{productForm.errors.category}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.category}
+                                    </span>
                                 )}
                             </div>
                             <div className="mt-4">
@@ -381,7 +408,10 @@ const EditProductForm = () => {
                                         name="category"
                                         value={productForm.values.category}
                                         onChange={(e) => {
-                                            productForm.setFieldValue('category', e.currentTarget.value);
+                                            productForm.setFieldValue(
+                                                'category',
+                                                e.currentTarget.value,
+                                            );
                                         }}
                                         className="w-full rounded-md border border-black px-2 py-2 outline-none"
                                     >
@@ -403,7 +433,9 @@ const EditProductForm = () => {
                             <div className="flex items-center justify-between">
                                 <span className="block text-sm font-medium">Tags</span>
                                 {productForm.errors.tags && (
-                                    <span className="text-sm text-red-500">{productForm.errors.tags}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.tags}
+                                    </span>
                                 )}
                             </div>
                             <div className="mt-4">
@@ -414,7 +446,9 @@ const EditProductForm = () => {
                                         value={productForm.values.tags || []}
                                         options={tags}
                                         getOptionLabel={(option) => option.name}
-                                        isOptionEqualToValue={(op, val) => op._id == val._id}
+                                        isOptionEqualToValue={(op, val) =>
+                                            op._id == val._id
+                                        }
                                         disableCloseOnSelect
                                         onChange={(_, value) => {
                                             productForm.setFieldValue('tags', value);
@@ -436,9 +470,13 @@ const EditProductForm = () => {
                         </div>
                         <div className="mt-6">
                             <div className="flex items-center justify-between">
-                                <span className="block text-sm font-medium">Material</span>
+                                <span className="block text-sm font-medium">
+                                    Material
+                                </span>
                                 {productForm.errors.material && (
-                                    <span className="text-sm text-red-500">{productForm.errors.material}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.material}
+                                    </span>
                                 )}
                             </div>
                             <input
@@ -463,9 +501,13 @@ const EditProductForm = () => {
                             <div className="flex-1 p-4">
                                 <div className="mt-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Color Name</span>
+                                        <span className="block text-sm font-medium">
+                                            Color Name
+                                        </span>
                                         {productForm.errors.colorName && (
-                                            <span className="text-sm text-red-500">{productForm.errors.colorName}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.colorName}
+                                            </span>
                                         )}
                                     </div>
                                     <input
@@ -479,9 +521,13 @@ const EditProductForm = () => {
                                 </div>
                                 <div className="mt-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Stock</span>
+                                        <span className="block text-sm font-medium">
+                                            Stock
+                                        </span>
                                         {productForm.errors.stock && (
-                                            <span className="text-sm text-red-500">{productForm.errors.stock}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.stock}
+                                            </span>
                                         )}
                                     </div>
                                     <input
@@ -496,9 +542,13 @@ const EditProductForm = () => {
                                 </div>
                                 <div className="mt-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Color thumb</span>
+                                        <span className="block text-sm font-medium">
+                                            Color thumb
+                                        </span>
                                         {productForm.errors.thumb && (
-                                            <span className="text-sm text-red-500">{productForm.errors.thumb}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.thumb}
+                                            </span>
                                         )}
                                     </div>
                                     <div className="relative mt-2 w-fit [&:hover_label]:opacity-100">
@@ -511,16 +561,27 @@ const EditProductForm = () => {
                                             htmlFor="add-color-thumb"
                                             className="absolute left-0 top-0 z-50 flex size-full cursor-pointer items-center justify-center bg-[#000000ab] opacity-0 transition-all"
                                         >
-                                            <span className="mr-1 text-sm text-white">Add image</span>
-                                            <PencilIcon className="size-4" color="white" />
+                                            <span className="mr-1 text-sm text-white">
+                                                Add image
+                                            </span>
+                                            <PencilIcon
+                                                className="size-4"
+                                                color="white"
+                                            />
                                         </label>
                                         <input
                                             type="file"
                                             onChange={(e) => {
                                                 const previewImg =
-                                                    e.currentTarget.previousElementSibling.previousElementSibling;
-                                                previewImg.src = URL.createObjectURL(e.currentTarget.files[0]);
-                                                productForm.setFieldValue('thumb', e.currentTarget.files[0]);
+                                                    e.currentTarget.previousElementSibling
+                                                        .previousElementSibling;
+                                                previewImg.src = URL.createObjectURL(
+                                                    e.currentTarget.files[0],
+                                                );
+                                                productForm.setFieldValue(
+                                                    'thumb',
+                                                    e.currentTarget.files[0],
+                                                );
                                             }}
                                             accept="image/*"
                                             id="add-color-thumb"
@@ -531,9 +592,13 @@ const EditProductForm = () => {
                             </div>
                             <div className="flex-1 p-4">
                                 <div className="flex items-center justify-between">
-                                    <span className="block text-sm font-medium">Images</span>
+                                    <span className="block text-sm font-medium">
+                                        Images
+                                    </span>
                                     {productForm.errors.images && (
-                                        <span className="text-sm text-red-500">{productForm.errors.images}</span>
+                                        <span className="text-sm text-red-500">
+                                            {productForm.errors.images}
+                                        </span>
                                     )}
                                 </div>
                                 <div className="mt-2 ">
@@ -541,7 +606,11 @@ const EditProductForm = () => {
                                         {productForm.values.images
                                             .map((img) => URL.createObjectURL(img))
                                             .map((img, index) => (
-                                                <ImageProduct key={index} src={img} index={index} />
+                                                <ImageProduct
+                                                    key={index}
+                                                    src={img}
+                                                    index={index}
+                                                />
                                             ))}
                                         <div
                                             className="relative mt-2 rounded-md border-2 border-dotted border-black"
@@ -552,7 +621,9 @@ const EditProductForm = () => {
                                                 className="flex size-full cursor-pointer flex-col items-center justify-center text-black transition-all"
                                             >
                                                 <CloudArrowUpIcon className="size-10" />
-                                                <span className="mr-1 text-sm">Add image</span>
+                                                <span className="mr-1 text-sm">
+                                                    Add image
+                                                </span>
                                             </label>
                                             <input
                                                 type="file"
@@ -562,10 +633,14 @@ const EditProductForm = () => {
                                                 onChange={(e) => {
                                                     const files = e.currentTarget.files;
                                                     if (files.length) {
-                                                        productForm.setFieldValue('images', [
-                                                            ...productForm.values.images,
-                                                            ...files,
-                                                        ]);
+                                                        productForm.setFieldValue(
+                                                            'images',
+                                                            [
+                                                                ...productForm.values
+                                                                    .images,
+                                                                ...files,
+                                                            ],
+                                                        );
                                                     }
                                                 }}
                                                 className="hidden"

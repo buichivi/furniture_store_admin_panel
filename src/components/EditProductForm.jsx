@@ -1,9 +1,6 @@
 import apiRequest from '@/utils/apiRequest';
 import { Button, Card, IconButton, Tooltip } from '@material-tailwind/react';
 import { useEffect, useState } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import 'react-quill/dist/quill.bubble.css';
 import { Autocomplete, TextField } from '@mui/material';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/solid';
@@ -12,31 +9,7 @@ import * as Yup from 'yup';
 import toast from 'react-hot-toast';
 import { ArrowLeftIcon, Square2StackIcon } from '@heroicons/react/24/outline';
 import useAuthStore from '@/stores/authStore';
-
-const modules = {
-    toolbar: [
-        [{ header: [6, 5, 4, 3, 2, 1, false] }],
-        ['bold', 'italic', 'underline', 'blockquote'],
-        [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
-        ['link'],
-        ['clean'],
-    ],
-};
-
-const formats = [
-    'header',
-    'font',
-    'size',
-    'bold',
-    'italic',
-    'underline',
-    'strike',
-    'blockquote',
-    'list',
-    'bullet',
-    'indent',
-    'video',
-];
+import { TextEditor } from './CKEditor';
 
 const EditProductForm = () => {
     const { slug } = useParams();
@@ -73,7 +46,12 @@ const EditProductForm = () => {
                 loading: 'Deleting...',
                 success: (res) => {
                     setProduct((product) => {
-                        return { ...product, colors: product.colors.filter((color) => color._id != colorId) };
+                        return {
+                            ...product,
+                            colors: product.colors.filter(
+                                (color) => color._id != colorId,
+                            ),
+                        };
                     });
                     return res.data.message;
                 },
@@ -109,7 +87,9 @@ const EditProductForm = () => {
             brand: Yup.string().required('This field is required'),
             category: Yup.string().required('This field is required'),
             material: Yup.string().required('This field is required'),
-            tags: Yup.array().min(1, 'Product must have at least 1 tag').required('This field is required'),
+            tags: Yup.array()
+                .min(1, 'Product must have at least 1 tag')
+                .required('This field is required'),
             width: Yup.number().required('This field is required'),
             height: Yup.number().required('This field is required'),
             depth: Yup.number().required('This field is required'),
@@ -130,7 +110,8 @@ const EditProductForm = () => {
                         navigate('/dashboard/product');
                         return res.data.message;
                     },
-                    error: (err) => err?.response?.data?.message || 'Something went wrong',
+                    error: (err) =>
+                        err?.response?.data?.message || 'Something went wrong',
                 },
             );
         },
@@ -161,7 +142,9 @@ const EditProductForm = () => {
                             <div className="flex items-center justify-between">
                                 <span className="block text-sm font-medium">Name</span>
                                 {productForm.errors.name && (
-                                    <span className="text-sm text-red-500">{productForm.errors.name}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.name}
+                                    </span>
                                 )}
                             </div>
                             <input
@@ -175,23 +158,28 @@ const EditProductForm = () => {
                         </div>
                         <div className="mt-6">
                             <div className="flex items-center justify-between">
-                                <span className="block text-sm font-medium">Description</span>
+                                <span className="block text-sm font-medium">
+                                    Description
+                                </span>
                                 {productForm.errors.description && (
-                                    <span className="text-sm text-red-500">{productForm.errors.description}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.description}
+                                    </span>
                                 )}
                             </div>
-                            <ReactQuill
-                                modules={modules}
-                                formats={formats}
-                                theme="bubble"
-                                name="description"
-                                value={productForm.values.description}
-                                onChange={(value) => {
-                                    productForm.setFieldValue('description', value);
-                                }}
-                                placeholder="Description"
-                                className="mt-1 bg-white [&_.ql-editor]:min-h-[250px] [&_.ql-tooltip-arrow]:!left-[8%] [&_.ql-tooltip]:!left-0"
-                            />
+                            <div className="mt-2">
+                                <TextEditor
+                                    initialValue={product?.description}
+                                    onChange={({ content }) => {
+                                        if (content) {
+                                            productForm.setFieldValue(
+                                                'description',
+                                                content,
+                                            );
+                                        }
+                                    }}
+                                />
+                            </div>
                         </div>
                     </Card>
                     <Card className="mt-4 flex-1 p-4">
@@ -200,9 +188,13 @@ const EditProductForm = () => {
                             <div className="flex-1">
                                 <div className="">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Width (cm)</span>
+                                        <span className="block text-sm font-medium">
+                                            Width (cm)
+                                        </span>
                                         {productForm.errors.width && (
-                                            <span className="text-sm text-red-500">{productForm.errors.width}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.width}
+                                            </span>
                                         )}
                                     </div>
                                     <input
@@ -217,9 +209,13 @@ const EditProductForm = () => {
                                 </div>
                                 <div className="mt-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Height (cm)</span>
+                                        <span className="block text-sm font-medium">
+                                            Height (cm)
+                                        </span>
                                         {productForm.errors.height && (
-                                            <span className="text-sm text-red-500">{productForm.errors.height}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.height}
+                                            </span>
                                         )}
                                     </div>
                                     <input
@@ -236,9 +232,13 @@ const EditProductForm = () => {
                             <div className="flex-1">
                                 <div className="">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Depth (cm)</span>
+                                        <span className="block text-sm font-medium">
+                                            Depth (cm)
+                                        </span>
                                         {productForm.errors.depth && (
-                                            <span className="text-sm text-red-500">{productForm.errors.depth}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.depth}
+                                            </span>
                                         )}
                                     </div>
                                     <input
@@ -246,7 +246,10 @@ const EditProductForm = () => {
                                         name="depth"
                                         value={productForm.values.depth}
                                         onChange={(e) => {
-                                            productForm.setFieldValue('depth', Number(e.target.value));
+                                            productForm.setFieldValue(
+                                                'depth',
+                                                Number(e.target.value),
+                                            );
                                         }}
                                         min="0"
                                         placeholder="Product depth"
@@ -255,9 +258,13 @@ const EditProductForm = () => {
                                 </div>
                                 <div className="mt-4">
                                     <div className="flex items-center justify-between">
-                                        <span className="block text-sm font-medium">Weight (kg)</span>
+                                        <span className="block text-sm font-medium">
+                                            Weight (kg)
+                                        </span>
                                         {productForm.errors.weight && (
-                                            <span className="text-sm text-red-500">{productForm.errors.weight}</span>
+                                            <span className="text-sm text-red-500">
+                                                {productForm.errors.weight}
+                                            </span>
                                         )}
                                     </div>
                                     <input
@@ -280,7 +287,9 @@ const EditProductForm = () => {
                             <div className="flex items-center justify-between">
                                 <span className="block text-sm font-medium">SKU</span>
                                 {productForm.errors.SKU && (
-                                    <span className="text-sm text-red-500">{productForm.errors.SKU}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.SKU}
+                                    </span>
                                 )}
                             </div>
                             <input
@@ -294,9 +303,13 @@ const EditProductForm = () => {
                         </div>
                         <div className="mt-4">
                             <div className="flex items-center justify-between">
-                                <span className="block text-sm font-medium">Base price ($)</span>
+                                <span className="block text-sm font-medium">
+                                    Base price ($)
+                                </span>
                                 {productForm.errors.price && (
-                                    <span className="text-sm text-red-500">{productForm.errors.price}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.price}
+                                    </span>
                                 )}
                             </div>
                             <input
@@ -311,9 +324,13 @@ const EditProductForm = () => {
                         </div>
                         <div className="mt-6">
                             <div className="flex items-center justify-between">
-                                <span className="block text-sm font-medium">Discount (%)</span>
+                                <span className="block text-sm font-medium">
+                                    Discount (%)
+                                </span>
                                 {productForm.errors.discount && (
-                                    <span className="text-sm text-red-500">{productForm.errors.discount}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.discount}
+                                    </span>
                                 )}
                             </div>
                             <input
@@ -333,7 +350,9 @@ const EditProductForm = () => {
                             <div className="flex items-center justify-between">
                                 <span className="block text-sm font-medium">Brand</span>
                                 {productForm.errors.brand && (
-                                    <span className="text-sm text-red-500">{productForm.errors.brand}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.brand}
+                                    </span>
                                 )}
                             </div>
                             <div className="mt-4">
@@ -342,7 +361,10 @@ const EditProductForm = () => {
                                         name="brand"
                                         value={productForm.values.brand}
                                         onChange={(e) => {
-                                            productForm.setFieldValue('brand', e.currentTarget.value);
+                                            productForm.setFieldValue(
+                                                'brand',
+                                                e.currentTarget.value,
+                                            );
                                         }}
                                         className="w-full rounded-md border border-black px-2 py-2 outline-none"
                                     >
@@ -352,7 +374,9 @@ const EditProductForm = () => {
                                                 <option
                                                     key={index}
                                                     value={brand._id}
-                                                    selected={brand._id === product?.brand?._id}
+                                                    selected={
+                                                        brand._id === product?.brand?._id
+                                                    }
                                                 >
                                                     {brand?.name}
                                                 </option>
@@ -364,9 +388,13 @@ const EditProductForm = () => {
                         </div>
                         <div className="mt-6">
                             <div className="flex items-center justify-between">
-                                <span className="block text-sm font-medium">Category</span>
+                                <span className="block text-sm font-medium">
+                                    Category
+                                </span>
                                 {productForm.errors.category && (
-                                    <span className="text-sm text-red-500">{productForm.errors.category}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.category}
+                                    </span>
                                 )}
                             </div>
                             <div className="mt-4">
@@ -375,7 +403,10 @@ const EditProductForm = () => {
                                         name="category"
                                         value={productForm.values.category}
                                         onChange={(e) => {
-                                            productForm.setFieldValue('category', e.currentTarget.value);
+                                            productForm.setFieldValue(
+                                                'category',
+                                                e.currentTarget.value,
+                                            );
                                         }}
                                         className="w-full rounded-md border border-black px-2 py-2 outline-none"
                                     >
@@ -387,7 +418,10 @@ const EditProductForm = () => {
                                                     <option
                                                         key={index}
                                                         value={cate._id}
-                                                        selected={cate._id === product?.category._id}
+                                                        selected={
+                                                            cate._id ===
+                                                            product?.category._id
+                                                        }
                                                     >
                                                         {cate?.name}
                                                     </option>
@@ -401,7 +435,9 @@ const EditProductForm = () => {
                             <div className="flex items-center justify-between">
                                 <span className="block text-sm font-medium">Tags</span>
                                 {productForm.errors.tags && (
-                                    <span className="text-sm text-red-500">{productForm.errors.tags}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.tags}
+                                    </span>
                                 )}
                             </div>
                             <div className="mt-4">
@@ -412,7 +448,9 @@ const EditProductForm = () => {
                                         value={productForm.values.tags || []}
                                         options={tags}
                                         getOptionLabel={(option) => option.name}
-                                        isOptionEqualToValue={(op, val) => op._id == val._id}
+                                        isOptionEqualToValue={(op, val) =>
+                                            op._id == val._id
+                                        }
                                         disableCloseOnSelect
                                         onChange={(_, value) => {
                                             productForm.setFieldValue('tags', value);
@@ -434,9 +472,13 @@ const EditProductForm = () => {
                         </div>
                         <div className="mt-6">
                             <div className="flex items-center justify-between">
-                                <span className="block text-sm font-medium">Material</span>
+                                <span className="block text-sm font-medium">
+                                    Material
+                                </span>
                                 {productForm.errors.material && (
-                                    <span className="text-sm text-red-500">{productForm.errors.material}</span>
+                                    <span className="text-sm text-red-500">
+                                        {productForm.errors.material}
+                                    </span>
                                 )}
                             </div>
                             <input
@@ -465,7 +507,9 @@ const EditProductForm = () => {
                                             <span
                                                 className="absolute -right-3 -top-3 flex size-6 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-black"
                                                 onClick={(e) => {
-                                                    const ip = e.currentTarget.parentElement.nextElementSibling;
+                                                    const ip =
+                                                        e.currentTarget.parentElement
+                                                            .nextElementSibling;
                                                     ip.checked = !ip.checked;
                                                 }}
                                             >
@@ -473,7 +517,9 @@ const EditProductForm = () => {
                                             </span>
                                         </Tooltip>
                                     )}
-                                    <Link to={`/dashboard/product/${slug}/edit-color/${_id}`}>
+                                    <Link
+                                        to={`/dashboard/product/${slug}/edit-color/${_id}`}
+                                    >
                                         <Tooltip content="Edit color">
                                             <img
                                                 src={thumb}
@@ -495,11 +541,19 @@ const EditProductForm = () => {
                                         ip.checked = !ip.checked;
                                     }}
                                 >
-                                    <Card className="min-w-[30%] p-4" onClick={(e) => e.stopPropagation()}>
-                                        <h3 className="font-semibold text-black">Delete color</h3>
+                                    <Card
+                                        className="min-w-[30%] p-4"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <h3 className="font-semibold text-black">
+                                            Delete color
+                                        </h3>
                                         <p>Are you sure to delete this color?</p>
                                         <div className="mt-4 flex items-center justify-center gap-2">
-                                            <Button color="red" onClick={() => handleDeleteColor(_id)}>
+                                            <Button
+                                                color="red"
+                                                onClick={() => handleDeleteColor(_id)}
+                                            >
                                                 Delete
                                             </Button>
                                             <Button

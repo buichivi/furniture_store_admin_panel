@@ -1,7 +1,16 @@
 import useAuthStore from '@/stores/authStore';
 import apiRequest from '@/utils/apiRequest';
 import { ArrowLeftIcon, BookmarkIcon } from '@heroicons/react/24/solid';
-import { Button, Card, IconButton, Input, Option, Select, Textarea, Tooltip } from '@material-tailwind/react';
+import {
+    Button,
+    Card,
+    IconButton,
+    Input,
+    Option,
+    Select,
+    Textarea,
+    Tooltip,
+} from '@material-tailwind/react';
 import axios from 'axios';
 import { useFormik } from 'formik';
 import moment from 'moment';
@@ -40,7 +49,9 @@ const EditOrder = () => {
         validationSchema: Yup.object().shape({
             firstName: Yup.string().required('First name is required'),
             lastName: Yup.string().required('Last name is required'),
-            email: Yup.string().email('Invalid email format').required('Email is required'),
+            email: Yup.string()
+                .email('Invalid email format')
+                .required('Email is required'),
             phoneNumber: Yup.string()
                 .matches(/^[0-9]{10}$/, 'Phone number should be 10 digits')
                 .required('Phone number is required'),
@@ -88,11 +99,15 @@ const EditOrder = () => {
             <Card className="mt-4 min-h-10 p-4">
                 <div className="flex items-center gap-10">
                     <h3 className="font-bold text-black">Order ID: #{order?._id}</h3>
-                    <p>Order date: {moment(order?.createdAt).format('DD/MM/YYYY HH:mm')}</p>
+                    <p>
+                        Order date: {moment(order?.createdAt).format('DD/MM/YYYY HH:mm')}
+                    </p>
                 </div>
                 <div className="mt-4 flex w-full items-center gap-10">
                     <div className="flex flex-1 items-center gap-2">
-                        <span className="shrink-0 font-bold text-black">Order status: </span>
+                        <span className="shrink-0 font-bold text-black">
+                            Order status:{' '}
+                        </span>
                         <select
                             className="w-full rounded-md border-2 p-2 text-sm capitalize transition-colors focus:border-black"
                             name="orderStatus"
@@ -100,19 +115,31 @@ const EditOrder = () => {
                             onChange={orderInfoForm.handleChange}
                             disabled={order?.orderStatus == 'completed'}
                         >
-                            {['pending', 'failed', 'processing', 'shipped', 'delivered', 'cancelled', 'completed'].map(
-                                (status) => {
-                                    return (
-                                        <option key={status} value={status} className="capitalize">
-                                            {status}
-                                        </option>
-                                    );
-                                },
-                            )}
+                            {[
+                                'pending',
+                                'failed',
+                                'processing',
+                                'shipped',
+                                'delivered',
+                                'cancelled',
+                                'completed',
+                            ].map((status) => {
+                                return (
+                                    <option
+                                        key={status}
+                                        value={status}
+                                        className="capitalize"
+                                    >
+                                        {status}
+                                    </option>
+                                );
+                            })}
                         </select>
                     </div>
                     <div className="flex flex-1 items-center gap-2">
-                        <span className="shrink-0 font-bold text-black">Payment status: </span>
+                        <span className="shrink-0 font-bold text-black">
+                            Payment status:{' '}
+                        </span>
                         <select
                             name="paymentStatus"
                             className="w-full rounded-md border-2 p-2 text-sm capitalize transition-colors focus:border-black"
@@ -122,7 +149,11 @@ const EditOrder = () => {
                         >
                             {['paid', 'unpaid'].map((status) => {
                                 return (
-                                    <option key={status} value={status} className="capitalize">
+                                    <option
+                                        key={status}
+                                        value={status}
+                                        className="capitalize"
+                                    >
                                         {status}
                                     </option>
                                 );
@@ -140,14 +171,25 @@ const EditOrder = () => {
                         <ul className="mt-2 flex w-full flex-col gap-2">
                             {order.items.map((item, index) => {
                                 return (
-                                    <li key={index} className="flex items-center gap-4 rounded-md border-2 p-2">
+                                    <li
+                                        key={index}
+                                        className="flex items-center gap-4 rounded-md border-2 p-2"
+                                    >
                                         <div className="w-1/4">
-                                            <img src={item?.productImage} alt="" className="size-full object-contain" />
+                                            <img
+                                                src={item?.productImage}
+                                                alt=""
+                                                className="size-full object-contain"
+                                            />
                                         </div>
                                         <div className="flex flex-col items-start gap-2 text-black">
                                             <h3>{item?.product?.name}</h3>
-                                            <span className="text-sm">{item?.color?.name}</span>
-                                            <span className="text-sm">x{item?.quantity}</span>
+                                            <span className="text-sm">
+                                                {item?.color?.name}
+                                            </span>
+                                            <span className="text-sm">
+                                                x{item?.quantity}
+                                            </span>
                                         </div>
                                         <span className="flex-1 text-right font-semibold text-black">
                                             ${item?.itemPrice}
@@ -215,54 +257,70 @@ const ShippingAddress = ({ form, order }) => {
             <div className="flex items-center gap-6">
                 <div className="relative flex-1 pb-6">
                     <Input
+                        className="p-2"
                         variant="standard"
                         label="First name"
                         name="firstName"
                         value={form.values.firstName}
                         onChange={form.handleChange}
+                        disabled={form.values.orderStatus == 'completed'}
                     />
                     {form.errors.firstName && (
-                        <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.firstName}</span>
+                        <span className="absolute bottom-0 left-0 text-sm text-red-400">
+                            {form.errors.firstName}
+                        </span>
                     )}
                 </div>
                 <div className="relative flex-1 pb-6">
                     <Input
+                        className="p-2"
                         variant="standard"
                         label="Last name"
                         name="lastName"
                         value={form.values.lastName}
                         onChange={form.handleChange}
+                        disabled={form.values.orderStatus == 'completed'}
                     />
                     {form.errors.lastName && (
-                        <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.lastName}</span>
+                        <span className="absolute bottom-0 left-0 text-sm text-red-400">
+                            {form.errors.lastName}
+                        </span>
                     )}
                 </div>
             </div>
             <div className="mt-2 flex items-center gap-6 ">
                 <div className="relative flex-1 pb-6">
                     <Input
+                        className="p-2"
                         variant="standard"
                         label="Email"
                         type="email"
                         name="email"
                         value={form.values.email}
                         onChange={form.handleChange}
+                        disabled={form.values.orderStatus == 'completed'}
                     />
                     {form.errors.email && (
-                        <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.email}</span>
+                        <span className="absolute bottom-0 left-0 text-sm text-red-400">
+                            {form.errors.email}
+                        </span>
                     )}
                 </div>
                 <div className="relative flex-1 pb-6">
                     <Input
+                        className="p-2"
                         variant="standard"
                         label="Phone number"
                         type="text"
                         name="phoneNumber"
                         value={form.values.phoneNumber}
                         onChange={form.handleChange}
+                        disabled={form.values.orderStatus == 'completed'}
                     />
                     {form.errors.phoneNumber && (
-                        <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.phoneNumber}</span>
+                        <span className="absolute bottom-0 left-0 text-sm text-red-400">
+                            {form.errors.phoneNumber}
+                        </span>
                     )}
                 </div>
             </div>
@@ -272,10 +330,13 @@ const ShippingAddress = ({ form, order }) => {
                     name="city"
                     value={form.values.city?.id}
                     onChange={(e) => {
-                        const city = cities.find((city) => city.id == e.currentTarget.value);
+                        const city = cities.find(
+                            (city) => city.id == e.currentTarget.value,
+                        );
                         form.setFieldValue('city', city);
                     }}
                     className="w-full rounded-md border-2 p-2 text-sm transition-colors focus:border-black"
+                    disabled={form.values.orderStatus == 'completed'}
                 >
                     {cities.map((city) => {
                         return (
@@ -286,7 +347,9 @@ const ShippingAddress = ({ form, order }) => {
                     })}
                 </select>
                 {form.errors.city && (
-                    <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.city}</span>
+                    <span className="absolute bottom-0 left-0 text-sm text-red-400">
+                        {form.errors.city}
+                    </span>
                 )}
             </div>
             <div className="mt-2 flex items-center gap-6">
@@ -296,10 +359,13 @@ const ShippingAddress = ({ form, order }) => {
                         name="district"
                         value={form.values.district?.id}
                         onChange={(e) => {
-                            const district = districts.find((district) => district.id == e.currentTarget.value);
+                            const district = districts.find(
+                                (district) => district.id == e.currentTarget.value,
+                            );
                             form.setFieldValue('district', district);
                         }}
                         className="w-full rounded-md border-2 p-2 text-sm transition-colors focus:border-black"
+                        disabled={form.values.orderStatus == 'completed'}
                     >
                         <option value="">Select district</option>
                         {districts.map((district) => {
@@ -311,7 +377,9 @@ const ShippingAddress = ({ form, order }) => {
                         })}
                     </select>
                     {form.errors.district && (
-                        <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.district}</span>
+                        <span className="absolute bottom-0 left-0 text-sm text-red-400">
+                            {form.errors.district}
+                        </span>
                     )}
                 </div>
                 <div className="relative flex-1 pb-6">
@@ -320,9 +388,12 @@ const ShippingAddress = ({ form, order }) => {
                         name="ward"
                         value={form.values.ward?.id}
                         onChange={(e) => {
-                            const ward = wards.find((ward) => ward.id == e.currentTarget.value);
+                            const ward = wards.find(
+                                (ward) => ward.id == e.currentTarget.value,
+                            );
                             form.setFieldValue('ward', ward);
                         }}
+                        disabled={form.values.orderStatus == 'completed'}
                         className="w-full rounded-md border-2 p-2 text-sm transition-colors focus:border-black"
                     >
                         <option value="">Select ward</option>
@@ -335,20 +406,26 @@ const ShippingAddress = ({ form, order }) => {
                         })}
                     </select>
                     {form.errors.ward && (
-                        <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.ward}</span>
+                        <span className="absolute bottom-0 left-0 text-sm text-red-400">
+                            {form.errors.ward}
+                        </span>
                     )}
                 </div>
             </div>
             <div className="relative mt-2 pb-6">
                 <Textarea
+                    className="p-2"
                     variant="standard"
                     label="Address line"
                     name="addressLine"
                     value={form.values.addressLine}
                     onChange={form.handleChange}
+                    disabled={form.values.orderStatus == 'completed'}
                 />
                 {form.errors.addressLine && (
-                    <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.addressLine}</span>
+                    <span className="absolute bottom-0 left-0 text-sm text-red-400">
+                        {form.errors.addressLine}
+                    </span>
                 )}
             </div>
         </div>

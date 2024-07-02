@@ -99,6 +99,138 @@ const SliderAndBanner = () => {
                 >
                     Add slider
                 </Button>
+                <input type="checkbox" ref={inputOpen} id="add-cate" className="hidden [&:checked+div]:flex" />
+                <div className="fixed left-0 top-0 z-50 hidden size-full items-center justify-center">
+                    <label htmlFor="add-cate" className="absolute left-0 top-0 size-full bg-[#000b]"></label>
+                    <Card className="absolute left-1/2 top-1/2 h-auto w-2/3 -translate-x-1/2 -translate-y-1/2 p-4">
+                        <h3 className="font-semibold capitalize">Add slider</h3>
+                        <form onSubmit={sliderForm.handleSubmit} className="mt-6">
+                            <div className="flex items-start gap-10">
+                                <label className="block flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm">Title</span>
+                                        {sliderForm.errors.title && (
+                                            <Typography className="text-sm" color="red">
+                                                {sliderForm.errors.title}
+                                            </Typography>
+                                        )}
+                                    </div>
+                                    <input
+                                        name="title"
+                                        type="text"
+                                        value={sliderForm.values.title}
+                                        onChange={sliderForm.handleChange}
+                                        placeholder="Category name"
+                                        className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-colors focus:border-b-black"
+                                    />
+                                </label>
+                                <label className="block flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm">Link</span>
+                                        {sliderForm.errors.link && (
+                                            <Typography className="text-sm" color="red">
+                                                {sliderForm.errors.link}
+                                            </Typography>
+                                        )}
+                                    </div>
+                                    <input
+                                        name="link"
+                                        type="text"
+                                        value={sliderForm.values.link}
+                                        onChange={sliderForm.handleChange}
+                                        placeholder="Link"
+                                        className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-colors focus:border-b-black"
+                                    />
+                                </label>
+                            </div>
+                            <label className="mt-4 block flex-1">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm">Heading</span>
+                                    {sliderForm.errors.heading && (
+                                        <Typography className="text-sm" color="red">
+                                            {sliderForm.errors.heading}
+                                        </Typography>
+                                    )}
+                                </div>
+                                <input
+                                    name="heading"
+                                    type="text"
+                                    value={sliderForm.values.heading}
+                                    onChange={sliderForm.handleChange}
+                                    placeholder="Heading"
+                                    className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-colors focus:border-b-black"
+                                />
+                            </label>
+                            <label className="mt-4 block">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm">Desciption</span>
+                                    {sliderForm.errors.description && (
+                                        <Typography className="text-sm" color="red">
+                                            {sliderForm.errors.description}
+                                        </Typography>
+                                    )}
+                                </div>
+                                <textarea
+                                    name="description"
+                                    spellCheck="false"
+                                    placeholder="Descrition"
+                                    value={sliderForm.values.description}
+                                    onChange={sliderForm.handleChange}
+                                    className="w-full resize-y border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-colors focus:border-b-black"
+                                    rows={4}
+                                ></textarea>
+                            </label>
+                            <div className="mt-4">
+                                <span className="mb-2 block text-sm">Image</span>
+                                {sliderForm.errors.image && (
+                                    <Typography className="text-sm" color="red">
+                                        {sliderForm.errors.image}
+                                    </Typography>
+                                )}
+                                <div className="relative w-fit [&:hover_label]:opacity-100">
+                                    <img
+                                        ref={previewCateImage}
+                                        src="https://placehold.co/600x400?text=Select%20image"
+                                        alt=""
+                                        className="size-28 object-cover"
+                                    />
+                                    <label
+                                        htmlFor="add-slider-image"
+                                        className="absolute left-0 top-0 z-50 flex size-full cursor-pointer items-center justify-center bg-[#000000ab] opacity-0 transition-all"
+                                    >
+                                        <span className="mr-1 text-sm text-white">Select image</span>
+                                        <PencilIcon className="size-4" color="white" />
+                                    </label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        id="add-slider-image"
+                                        onChange={(e) => {
+                                            sliderForm.setFieldValue('image', e.target.files[0]);
+                                            previewCateImage.current.src = URL.createObjectURL(
+                                                e.currentTarget.files[0],
+                                            );
+                                        }}
+                                        className="hidden"
+                                    />
+                                </div>
+                            </div>
+                            <div className="mt-6 flex items-center justify-center gap-4">
+                                <Button color="cyan" variant="outlined" type="submit">
+                                    Add
+                                </Button>
+                                <Button color="red" className="relative">
+                                    <label
+                                        htmlFor="add-cate"
+                                        className="absolute left-0 top-0 size-full"
+                                        onClick={(e) => e.stopPropagation()}
+                                    ></label>
+                                    Close
+                                </Button>
+                            </div>
+                        </form>
+                    </Card>
+                </div>
                 <input
                     className="max-w-1/2 min-w-[300px] rounded-md border-2 p-2 text-sm outline-none transition-colors focus:border-black"
                     placeholder="Search..."
@@ -109,137 +241,6 @@ const SliderAndBanner = () => {
                     }}
                 />
             </div>
-            <input type="checkbox" ref={inputOpen} id="add-cate" className="hidden [&:checked+div]:flex" />
-            <div className="fixed left-0 top-0 z-50 hidden size-full items-center justify-center">
-                <label htmlFor="add-cate" className="absolute left-0 top-0 size-full bg-[#000b]"></label>
-                <Card className="absolute left-1/2 top-1/2 h-auto w-2/3 -translate-x-1/2 -translate-y-1/2 p-4">
-                    <h3 className="font-semibold capitalize">Add slider</h3>
-                    <form onSubmit={sliderForm.handleSubmit} className="mt-6">
-                        <div className="flex items-start gap-10">
-                            <label className="block flex-1">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm">Title</span>
-                                    {sliderForm.errors.title && (
-                                        <Typography className="text-sm" color="red">
-                                            {sliderForm.errors.title}
-                                        </Typography>
-                                    )}
-                                </div>
-                                <input
-                                    name="title"
-                                    type="text"
-                                    value={sliderForm.values.title}
-                                    onChange={sliderForm.handleChange}
-                                    placeholder="Category name"
-                                    className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-colors focus:border-b-black"
-                                />
-                            </label>
-                            <label className="block flex-1">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm">Link</span>
-                                    {sliderForm.errors.link && (
-                                        <Typography className="text-sm" color="red">
-                                            {sliderForm.errors.link}
-                                        </Typography>
-                                    )}
-                                </div>
-                                <input
-                                    name="link"
-                                    type="text"
-                                    value={sliderForm.values.link}
-                                    onChange={sliderForm.handleChange}
-                                    placeholder="Link"
-                                    className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-colors focus:border-b-black"
-                                />
-                            </label>
-                        </div>
-                        <label className="mt-4 block flex-1">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm">Heading</span>
-                                {sliderForm.errors.heading && (
-                                    <Typography className="text-sm" color="red">
-                                        {sliderForm.errors.heading}
-                                    </Typography>
-                                )}
-                            </div>
-                            <input
-                                name="heading"
-                                type="text"
-                                value={sliderForm.values.heading}
-                                onChange={sliderForm.handleChange}
-                                placeholder="Heading"
-                                className="w-full border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-colors focus:border-b-black"
-                            />
-                        </label>
-                        <label className="mt-4 block">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm">Desciption</span>
-                                {sliderForm.errors.description && (
-                                    <Typography className="text-sm" color="red">
-                                        {sliderForm.errors.description}
-                                    </Typography>
-                                )}
-                            </div>
-                            <textarea
-                                name="description"
-                                spellCheck="false"
-                                placeholder="Descrition"
-                                value={sliderForm.values.description}
-                                onChange={sliderForm.handleChange}
-                                className="w-full resize-y border-b border-b-gray-300 py-2 pl-2 text-sm outline-none transition-colors focus:border-b-black"
-                                rows={4}
-                            ></textarea>
-                        </label>
-                        <div className="mt-4">
-                            <span className="mb-2 block text-sm">Image</span>
-                            {sliderForm.errors.image && (
-                                <Typography className="text-sm" color="red">
-                                    {sliderForm.errors.image}
-                                </Typography>
-                            )}
-                            <div className="relative w-fit [&:hover_label]:opacity-100">
-                                <img
-                                    ref={previewCateImage}
-                                    src="https://placehold.co/600x400?text=Select%20image"
-                                    alt=""
-                                    className="size-28 object-cover"
-                                />
-                                <label
-                                    htmlFor="add-slider-image"
-                                    className="absolute left-0 top-0 z-50 flex size-full cursor-pointer items-center justify-center bg-[#000000ab] opacity-0 transition-all"
-                                >
-                                    <span className="mr-1 text-sm text-white">Select image</span>
-                                    <PencilIcon className="size-4" color="white" />
-                                </label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    id="add-slider-image"
-                                    onChange={(e) => {
-                                        sliderForm.setFieldValue('image', e.target.files[0]);
-                                        previewCateImage.current.src = URL.createObjectURL(e.currentTarget.files[0]);
-                                    }}
-                                    className="hidden"
-                                />
-                            </div>
-                        </div>
-                        <div className="mt-6 flex items-center justify-center gap-4">
-                            <Button color="cyan" variant="outlined" type="submit">
-                                Add
-                            </Button>
-                            <Button color="red" className="relative">
-                                <label
-                                    htmlFor="add-cate"
-                                    className="absolute left-0 top-0 size-full"
-                                    onClick={(e) => e.stopPropagation()}
-                                ></label>
-                                Close
-                            </Button>
-                        </div>
-                    </form>
-                </Card>
-            </div>
-
             <div
                 className="ag-theme-quartz" // applying the grid theme
                 style={{ height: 500 }} // the grid will fill the size of the parent container

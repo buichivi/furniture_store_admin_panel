@@ -25,7 +25,15 @@ import {
     Blog,
 } from '@/pages/dashboard';
 import { SignIn, SignUp } from '@/pages/auth';
-import { AddBlog, AddColor, AddProduct, EditCategoryForm, EditColor, EditOrder, EditProductForm } from './components';
+import {
+    AddBlog,
+    AddColor,
+    AddProduct,
+    EditCategoryForm,
+    EditColor,
+    EditOrder,
+    EditProductForm,
+} from './components';
 import { element } from 'prop-types';
 import Order from './pages/dashboard/order';
 
@@ -148,6 +156,10 @@ const subRoutes = [
     },
     {
         path: '/blog/create',
+        element: <AddBlog />,
+    },
+    {
+        path: '/blog/edit/:slug',
         element: <AddBlog />,
     },
 ];
