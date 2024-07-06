@@ -7,7 +7,9 @@ const useCategoryStore = create((set) => ({
     setDragCate: (cate) => set(() => ({ dragCate: cate })),
     moveCate: (parentId) =>
         set((state) => ({
-            categories: state.categories.map((cate) => (cate._id == state.dragCate._id ? { ...cate, parentId } : cate)),
+            categories: state.categories.map((cate) =>
+                cate._id == state.dragCate._id ? { ...cate, parentId } : cate,
+            ),
         })),
 }));
 

@@ -9,7 +9,7 @@ import { useRef } from 'react';
 import toast from 'react-hot-toast';
 import * as Yup from 'yup';
 
-const EditCategoryForm = ({ category = {}, index = {} }) => {
+const EditCategoryForm = ({ category = {}, setIsEdit }) => {
     const { categories, setCategories } = useCategoryStore();
     const previewCateImage = useRef();
     const { _id, name, imageUrl, description, parentId } = category;
@@ -45,7 +45,12 @@ const EditCategoryForm = ({ category = {}, index = {} }) => {
                 {
                     loading: 'Updating...',
                     success: (res) => {
-                        setCategories(categories.map((cate) => (cate._id === _id ? res.data.category : cate)));
+                        setCategories(
+                            categories.map((cate) =>
+                                cate._id === _id ? res.data.category : cate,
+                            ),
+                        );
+                        setIsEdit(false);
                         return res.data.message;
                     },
                     error: (err) => {
@@ -110,10 +115,14 @@ const EditCategoryForm = ({ category = {}, index = {} }) => {
                             >
                                 <option value="">Select category</option>
                                 {categories
-                                    .filter((cate) => cate.parentId == '' && cate._id != category._id)
+                                    .filter(
+                                        (cate) =>
+                                            cate.parentId == '' &&
+                                            cate._id != category._id,
+                                    )
                                     .map((cate, index) => {
                                         return (
-                                            <option key={index} value={cate._id} selected={cate._id === category._id}>
+                                            <option key={index} value={cate._id}>
                                                 {cate?.name}
                                             </option>
                                         );
@@ -124,50 +133,49 @@ const EditCategoryForm = ({ category = {}, index = {} }) => {
                 </div>
                 <div className="mt-4">
                     <span className="mb-2 block text-sm">Image</span>
-                    {editCateForm.errors.imageUrl && <Typography>{editCateForm.errors.imageUrl}</Typography>}
+                    {editCateForm.errors.imageUrl && (
+                        <Typography>{editCateForm.errors.imageUrl}</Typography>
+                    )}
                     <div className="relative w-fit [&:hover_label]:opacity-100">
                         <img
                             ref={previewCateImage}
-                            src={imageUrl || 'https://placehold.co/600x400?text=Select%20image'}
+                            src={
+                                imageUrl ||
+                                'https://placehold.co/600x400?text=Select%20image'
+                            }
                             alt=""
                             className="size-28 object-cover"
                         />
-                        <label
-                            htmlFor={`edit-img-cate-${index}`}
-                            className="absolute left-0 top-0 z-50 flex size-full cursor-pointer items-center justify-center bg-[#000000ab] opacity-0 transition-all"
-                        >
+                        <label className="absolute left-0 top-0 z-50 flex size-full cursor-pointer items-center justify-center bg-[#000000ab] opacity-0 transition-all">
                             <span className="mr-1 text-sm text-white">Edit image</span>
                             <PencilIcon className="size-4" color="white" />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    editCateForm.setFieldValue(
+                                        'imageUrl',
+                                        e.currentTarget.files[0],
+                                    );
+                                    previewCateImage.current.src = URL.createObjectURL(
+                                        e.currentTarget.files[0],
+                                    );
+                                    // setFile(e.currentTarget.files[0]);
+                                }}
+                                className="hidden"
+                            />
                         </label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            id={`edit-img-cate-${index}`}
-                            onChange={(e) => {
-                                editCateForm.setFieldValue('imageUrl', e.currentTarget.files[0]);
-                                previewCateImage.current.src = URL.createObjectURL(e.currentTarget.files[0]);
-                                // setFile(e.currentTarget.files[0]);
-                            }}
-                            className="hidden"
-                        />
                     </div>
                 </div>
                 <div className="mt-6 flex items-center justify-center gap-4">
-                    <Button
-                        color="blue"
-                        variant="outlined"
-                        type="submit"
-                        onClick={(e) => {
-                            e.currentTarget.nextElementSibling.children[0].click();
-                        }}
-                    >
+                    <Button color="blue" variant="outlined" type="submit">
                         Save
                     </Button>
-                    <Button color="red" className="relative">
-                        <label
-                            htmlFor={`edit-cate-${index}`}
-                            className="absolute left-0 top-0 size-full cursor-pointer"
-                        ></label>
+                    <Button
+                        color="red"
+                        className="relative"
+                        onClick={() => setIsEdit(false)}
+                    >
                         Close
                     </Button>
                 </div>

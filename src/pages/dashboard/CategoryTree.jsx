@@ -1,7 +1,12 @@
-import { EyeIcon, EyeSlashIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Button, Card, IconButton, Tooltip, Typography, useTabs } from '@material-tailwind/react';
+import {
+    EyeIcon,
+    EyeSlashIcon,
+    PencilIcon,
+    TrashIcon,
+} from '@heroicons/react/24/outline';
+import { Button, Card, IconButton, Tooltip, Typography } from '@material-tailwind/react';
 import useCategoryStore from '@/stores/categoryStore';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import apiRequest from '@/utils/apiRequest';
 import toast from 'react-hot-toast';
 import { EditCategoryForm } from '@/components';
@@ -24,10 +29,43 @@ const getCategoryTree = (categories) => {
     return categoryTree;
 };
 
+const isChild = (targetId, draggedId, categoryTree) => {
+    const findCategory = (id, tree) => {
+        for (const cate of tree) {
+            if (cate._id == id) {
+                return cate;
+            }
+            if (cate.child.length) {
+                const found = findCategory(id, cate.child);
+                if (found) return found;
+            }
+        }
+    };
+
+    const draggedCategory = findCategory(draggedId, categoryTree);
+    const targetCategory = findCategory(targetId, categoryTree);
+
+    const checkIsChild = (target, dragged) => {
+        if (target._id == dragged._id) return true;
+        for (let child of dragged.child) {
+            if (checkIsChild(target, child)) return true;
+        }
+        return false;
+    };
+
+    if (draggedCategory && targetCategory) {
+        return checkIsChild(targetCategory, draggedCategory);
+    }
+    return false;
+};
+
 export const CategoryTree = () => {
     const { token } = useAuthStore();
-    const { categories, setCategories } = useCategoryStore();
     const addCateBtn = useRef();
+    const { categories, setCategories, moveCate, dragCate } = useCategoryStore();
+    const [drop, setDrop] = useState();
+    const [isEdit, setIsEdit] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState({});
 
     useEffect(() => {
         apiRequest
@@ -35,6 +73,10 @@ export const CategoryTree = () => {
             .then((res) => setCategories(res.data.categories))
             .catch((err) => console.log(err));
     }, []);
+
+    const categoryTree = useMemo(() => {
+        return getCategoryTree(categories);
+    }, [categories]);
 
     const addCateForm = useFormik({
         initialValues: {
@@ -55,7 +97,9 @@ export const CategoryTree = () => {
                 formData.append(key, values[key]);
             }
             toast.promise(
-                apiRequest.post('/categories/', formData, { headers: { Authorization: 'Bearer ' + token } }),
+                apiRequest.post('/categories/', formData, {
+                    headers: { Authorization: 'Bearer ' + token },
+                }),
                 {
                     loading: 'Creating...',
                     success: (res) => {
@@ -79,7 +123,8 @@ export const CategoryTree = () => {
                 variant="gradient"
                 className="mb-4"
                 onClick={(e) => {
-                    e.currentTarget.nextElementSibling.checked = !e.currentTarget.nextElementSibling.checked;
+                    e.currentTarget.nextElementSibling.checked =
+                        !e.currentTarget.nextElementSibling.checked;
                 }}
             >
                 Add category
@@ -95,7 +140,10 @@ export const CategoryTree = () => {
                 }}
             />
             <div className="fixed left-0 top-0 z-50 hidden size-full items-center justify-center">
-                <label htmlFor="add-cate" className="absolute left-0 top-0 size-full bg-[#000b]"></label>
+                <label
+                    htmlFor="add-cate"
+                    className="absolute left-0 top-0 size-full bg-[#000b]"
+                ></label>
                 <Card className="absolute left-1/2 top-1/2 h-auto w-2/3 -translate-x-1/2 -translate-y-1/2 p-4">
                     <h3 className="font-semibold capitalize">Add category</h3>
                     <form onSubmit={addCateForm.handleSubmit} className="mt-6">
@@ -182,7 +230,9 @@ export const CategoryTree = () => {
                                     htmlFor="add-cate-image"
                                     className="absolute left-0 top-0 z-50 flex size-full cursor-pointer items-center justify-center bg-[#000000ab] opacity-0 transition-all"
                                 >
-                                    <span className="mr-1 text-sm text-white">Select image</span>
+                                    <span className="mr-1 text-sm text-white">
+                                        Select image
+                                    </span>
                                     <PencilIcon className="size-4" color="white" />
                                 </label>
                                 <input
@@ -190,7 +240,10 @@ export const CategoryTree = () => {
                                     accept="image/*"
                                     id="add-cate-image"
                                     onChange={(e) => {
-                                        addCateForm.setFieldValue('imageUrl', e.currentTarget.files[0]);
+                                        addCateForm.setFieldValue(
+                                            'imageUrl',
+                                            e.currentTarget.files[0],
+                                        );
                                         e.currentTarget.previousElementSibling.previousElementSibling.src =
                                             URL.createObjectURL(e.currentTarget.files[0]);
                                     }}
@@ -199,14 +252,21 @@ export const CategoryTree = () => {
                             </div>
                         </div>
                         <div className="mt-6 flex items-center justify-center gap-4">
-                            <Button color="cyan" variant="outlined" type="submit" ref={addCateBtn}>
+                            <Button
+                                color="cyan"
+                                variant="outlined"
+                                type="submit"
+                                ref={addCateBtn}
+                            >
                                 Add
                             </Button>
                             <label htmlFor="add-cate" className="hidden"></label>
                             <Button
                                 color="red"
                                 className="relative"
-                                onClick={(e) => e.currentTarget.previousElementSibling.click()}
+                                onClick={(e) =>
+                                    e.currentTarget.previousElementSibling.click()
+                                }
                             >
                                 Close
                             </Button>
@@ -214,84 +274,171 @@ export const CategoryTree = () => {
                     </form>
                 </Card>
             </div>
-            {getCategoryTree(categories).map((cate, index) => {
-                return <CategoryItem key={index} category={cate} />;
-            })}
-        </div>
-    );
-};
-
-const CategoryItem = ({ category = {}, className = '', isParent = true, drag = false }) => {
-    const { dragCate, setDragCate, moveCate, categories, setCategories } = useCategoryStore();
-    const [drop, setDrop] = useState(false);
-    const { token } = useAuthStore();
-
-    const handleDeleteCate = (id) => {
-        toast.promise(apiRequest.delete('/categories/' + id, { headers: { Authorization: 'Bearer ' + token } }), {
-            loading: 'Deleting...',
-            success: (res) => {
-                setCategories(
-                    categories
-                        .map((cate) => (cate.parentId == id ? { ...cate, parentId: '' } : cate))
-                        .filter((cate) => cate._id !== id),
-                );
-                return res.data?.message;
-            },
-            error: (err) => {
-                console.log(err);
-                return err?.response?.data?.error || 'Something went wrong';
-            },
-        });
-    };
-    return (
-        <div
-            className={`${className} w-fit cursor-grab border-2 border-dotted ${
-                category?.parentId == '' && drop ? '!border-black' : '!border-transparent'
-            }`}
-            onDragOver={(e) => {
-                e.preventDefault();
-                if (category.parentId == '') setDrop(true);
-            }}
-            onDragLeave={() => {
-                if (category.parentId == '') setDrop(false);
-            }}
-            onDrop={() => {
-                if (category.parentId == '') {
-                    console.log(dragCate);
+            <div
+                data-id="parent"
+                className={`px-2 py-4 text-sm italic text-gray-600 ${
+                    drop ? 'bg-gray-200' : 'bg-transparent'
+                }`}
+                onDragOver={(e) => {
+                    e.preventDefault();
+                    setDrop(true);
+                }}
+                onDragLeave={(e) => {
+                    e.preventDefault();
+                    setDrop(false);
+                }}
+                onDrop={(e) => {
+                    e.preventDefault();
                     toast.promise(
                         apiRequest.patch(
                             '/categories/' + dragCate._id,
-                            { parentId: category._id },
+                            { parentId: '' },
                             { headers: { Authorization: 'Bearer ' + token } },
                         ),
                         {
                             loading: 'Updating...',
                             success: (res) => {
-                                moveCate(category._id);
+                                moveCate('');
+                                setDrop(false);
                                 return res.data.message;
                             },
                             error: (err) => err.response.data.error,
                         },
                     );
-                    setDrop(false);
+                }}
+            >
+                * Drag category here to set it to the highest parent level
+            </div>
+            {categoryTree.map((cate, index) => {
+                return (
+                    <CategoryItem
+                        key={index}
+                        category={cate}
+                        setIsEdit={setIsEdit}
+                        setSelectedCategory={setSelectedCategory}
+                    />
+                );
+            })}
+
+            {isEdit && (
+                <div className="fixed left-0 top-0 z-50 h-full w-full">
+                    <span
+                        onClick={() => setIsEdit(false)}
+                        className="block h-full w-full bg-[#000000a1]"
+                    ></span>
+                    <EditCategoryForm category={selectedCategory} setIsEdit={setIsEdit} />
+                </div>
+            )}
+        </div>
+    );
+};
+
+const CategoryItem = ({
+    category = {},
+    className = '',
+    isParent = true,
+    drag = true,
+    isLastChild = false,
+    setIsEdit,
+    setSelectedCategory,
+}) => {
+    const { dragCate, setDragCate, moveCate, categories, setCategories } =
+        useCategoryStore();
+    const { token } = useAuthStore();
+
+    const handleDeleteCate = (id) => {
+        toast.promise(
+            apiRequest.delete('/categories/' + id, {
+                headers: { Authorization: 'Bearer ' + token },
+            }),
+            {
+                loading: 'Deleting...',
+                success: (res) => {
+                    setCategories(
+                        categories
+                            .map((cate) =>
+                                cate.parentId == id ? { ...cate, parentId: '' } : cate,
+                            )
+                            .filter((cate) => cate._id !== id),
+                    );
+                    return res.data?.message;
+                },
+                error: (err) => {
+                    console.log(err);
+                    return err?.response?.data?.error || 'Something went wrong';
+                },
+            },
+        );
+    };
+
+    const handleChangeParent = (targetId) => {
+        toast.promise(
+            apiRequest.patch(
+                '/categories/' + dragCate._id,
+                { parentId: targetId },
+                { headers: { Authorization: 'Bearer ' + token } },
+            ),
+            {
+                loading: 'Updating...',
+                success: (res) => {
+                    moveCate(targetId);
+                    return res.data.message;
+                },
+                error: (err) => err.response.data.error,
+            },
+        );
+    };
+
+    const categoryTree = useMemo(() => {
+        return getCategoryTree(categories);
+    }, [categories]);
+
+    return (
+        <div
+            data-id={category?._id}
+            className={`${className} relative w-fit cursor-grab ${
+                !isParent ? 'py-4' : 'p-4'
+            }`}
+            onDragOver={(e) => {
+                e.preventDefault();
+                console.log(dragCate?.name);
+            }}
+            onDragLeave={() => {}}
+            onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const targetId = e.target.closest('[data-id]').dataset.id;
+                if (!isChild(targetId, dragCate._id, categoryTree)) {
+                    handleChangeParent(targetId);
                 }
             }}
         >
-            <div className="relative mb-4 flex w-fit items-stretch gap-2">
+            {!isParent && (
+                <span
+                    className={`absolute left-0 top-0 ${
+                        isLastChild ? 'h-[36px]' : 'h-full'
+                    } w-[1px] bg-black`}
+                ></span>
+            )}
+            <div className={`relative flex w-fit items-stretch `}>
                 {isParent && (
-                    <div className="flex items-center">
-                        <span>------</span>
+                    <div className="flex w-10 shrink-0 items-center">
+                        <span className="inline-block h-[1px] w-full bg-black"></span>
                     </div>
                 )}
                 {!isParent && (
-                    <div className="flex items-center border-l-2 border-dotted border-[#00000060]">
-                        <span className="color-black opacity-40 ">-------</span>
+                    <div className="flex w-8 items-center">
+                        <span className="inline-block h-[1px] w-full bg-black"></span>
                     </div>
                 )}
                 <div
-                    className={`flex items-center gap-2 ${drag ? 'select-auto' : 'select-none'}`}
+                    className={`flex items-center gap-2`}
                     draggable={drag}
-                    onDragStart={() => setDragCate(category)}
+                    onDragStart={() => {
+                        console.log(category?.name);
+                        setDragCate(category);
+                    }}
                 >
                     <div
                         className={`flex min-h-5 min-w-[200px] cursor-default items-center justify-between gap-2 rounded-md bg-white p-2 text-black shadow-lg ${
@@ -301,30 +448,19 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
                         {category?.name}
                         <div className="flex items-center gap-2">
                             <span
-                                onClick={(e) => {
-                                    const inputEdit = e.currentTarget.nextElementSibling;
-                                    inputEdit.checked = !inputEdit.checked;
+                                onClick={() => {
+                                    setIsEdit(true);
+                                    setSelectedCategory(category);
                                 }}
                             >
                                 <Tooltip content="Edit Category">
                                     <PencilIcon className="h-4 w-4 cursor-pointer" />
                                 </Tooltip>
                             </span>
-                            <input
-                                type="checkbox"
-                                className="hidden [&:checked+div]:block"
-                                id={`edit-cate-${category._id}`}
-                            />
-                            <div className="fixed left-0 top-0 z-50 hidden h-full w-full">
-                                <label
-                                    htmlFor={`edit-cate-${category._id}`}
-                                    className="block h-full w-full bg-[#000000a1]"
-                                ></label>
-                                <EditCategoryForm category={category} index={category._id} />
-                            </div>
                             <span
                                 onClick={(e) => {
-                                    const inputDelete = e.currentTarget.nextElementSibling;
+                                    const inputDelete =
+                                        e.currentTarget.nextElementSibling;
                                     inputDelete.checked = !inputDelete.checked;
                                 }}
                             >
@@ -343,10 +479,16 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
                                     className="absolute left-0 top-0 h-full w-full bg-[#000000a1]"
                                 ></label>
                                 <Card className="h-auto min-w-[50%] px-4 py-6">
-                                    <h3 className="text-left font-semibold">Confirm Delete</h3>
+                                    <h3 className="text-left font-semibold">
+                                        Confirm Delete
+                                    </h3>
                                     <p className="mt-2 text-sm">
-                                        Are you sure you want to delete the category named "
-                                        <span className="font-bold">{category?.name}</span>"?
+                                        Are you sure you want to delete the category named
+                                        "
+                                        <span className="font-bold">
+                                            {category?.name}
+                                        </span>
+                                        "?
                                     </p>
                                     <div className="mt-10 flex items-center justify-center gap-10">
                                         <Button
@@ -386,7 +528,10 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
                                         setCategories(
                                             categories.map((cate) => {
                                                 return cate._id == category._id
-                                                    ? { ...cate, active: !category.active }
+                                                    ? {
+                                                          ...cate,
+                                                          active: !category.active,
+                                                      }
                                                     : cate;
                                             }),
                                         );
@@ -397,19 +542,26 @@ const CategoryItem = ({ category = {}, className = '', isParent = true, drag = f
                             );
                         }}
                     >
-                        {category?.active ? <EyeIcon className="size-4" /> : <EyeSlashIcon className="size-4" />}
+                        {category?.active ? (
+                            <EyeIcon className="size-4" />
+                        ) : (
+                            <EyeSlashIcon className="size-4" />
+                        )}
                     </IconButton>
                 </div>
             </div>
             <div>
-                {category?.child?.map((cate) => {
+                {category?.child?.map((cate, index) => {
                     return (
                         <CategoryItem
                             key={cate._id}
                             category={cate}
                             className={`${category?.child?.length && 'ml-14'}`}
-                            isParent={category?.child?.length && false}
+                            isParent={false}
                             drag={true}
+                            isLastChild={index == category?.child?.length - 1}
+                            setIsEdit={setIsEdit}
+                            setSelectedCategory={setSelectedCategory}
                         />
                     );
                 })}
