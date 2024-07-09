@@ -11,6 +11,32 @@ import { ArrowLeftIcon, Square2StackIcon } from '@heroicons/react/24/outline';
 import useAuthStore from '@/stores/authStore';
 import { TextEditor } from './CKEditor';
 
+const getCategoryTree = (categories) => {
+    const categoryMap = {};
+    categories.forEach((cate) => (categoryMap[cate._id] = { ...cate, child: [] }));
+
+    const categoryTree = [];
+    categories.forEach((cate) => {
+        if (cate.parentId === '') {
+            categoryTree.push(categoryMap[cate._id]);
+        } else {
+            categoryMap[cate.parentId]?.child.push(categoryMap[cate._id]);
+        }
+    });
+    return categoryTree;
+};
+function getLeafCategories(categories) {
+    let leaves = [];
+    categories.forEach((category) => {
+        if (!category.child || category.child.length === 0) {
+            leaves.push(category);
+        } else {
+            leaves = leaves.concat(getLeafCategories(category.child));
+        }
+    });
+    return leaves;
+}
+
 const EditProductForm = () => {
     const { slug } = useParams();
     const [categories, setCategories] = useState([]);
@@ -411,22 +437,21 @@ const EditProductForm = () => {
                                         className="w-full rounded-md border border-black px-2 py-2 outline-none"
                                     >
                                         <option value="">Select category</option>
-                                        {categories
-                                            .filter((cate) => cate.parentId != '')
-                                            .map((cate, index) => {
-                                                return (
-                                                    <option
-                                                        key={index}
-                                                        value={cate._id}
-                                                        selected={
-                                                            cate._id ===
-                                                            product?.category._id
-                                                        }
-                                                    >
-                                                        {cate?.name}
-                                                    </option>
-                                                );
-                                            })}
+                                        {getLeafCategories(
+                                            getCategoryTree(categories),
+                                        ).map((cate, index) => {
+                                            return (
+                                                <option
+                                                    key={index}
+                                                    value={cate._id}
+                                                    selected={
+                                                        cate._id === product?.category._id
+                                                    }
+                                                >
+                                                    {cate?.name}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
                                 )}
                             </div>
