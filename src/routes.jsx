@@ -25,15 +25,7 @@ import {
     Blog,
 } from '@/pages/dashboard';
 import { SignIn, SignUp } from '@/pages/auth';
-import {
-    AddBlog,
-    AddColor,
-    AddProduct,
-    EditCategoryForm,
-    EditColor,
-    EditOrder,
-    EditProductForm,
-} from './components';
+import { AddBlog, AddColor, AddProduct, EditCategoryForm, EditColor, EditOrder, EditProductForm } from './components';
 import { element } from 'prop-types';
 import Order from './pages/dashboard/order';
 
@@ -89,8 +81,8 @@ export const routes = [
             },
             {
                 icon: <AdjustmentsHorizontalIcon {...icon} />,
-                name: 'Slider and banner',
-                path: '/slider-and-banner',
+                name: 'Slider',
+                path: '/slider',
                 element: <SliderAndBanner />,
             },
             {

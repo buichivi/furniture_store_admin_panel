@@ -58,119 +58,30 @@ const PromoCode = () => {
                     }}
                 />
             </div>
-            {/* <Card className="mt-4 h-full w-full overflow-scroll">
-                <table className="w-full min-w-max table-auto text-left">
-                    <thead>
-                        <tr>
-                            {TABLE_HEAD.map((head) => (
-                                <th key={head} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
-                                    <Typography
-                                        variant="small"
-                                        color="blue-gray"
-                                        className="font-normal leading-none opacity-70"
-                                    >
-                                        {head}
-                                    </Typography>
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {promoCodes.length === 0 && (
-                            <tr>
-                                <td colSpan={TABLE_HEAD.length}>
-                                    <div className="flex min-h-[50vh] items-center justify-center opacity-50">
-                                        <InboxIcon className="size-5 text-black" />
-                                        <span className="ml-2 text-sm">Empty</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        )}
-                        {promoCodes.map((promoCode, index) => {
-                            const { _id, code, type, discount, startDate, endDate, currentUses, maxUsage, active } =
-                                promoCode;
-                            const isLast = index === promoCodes.length - 1;
-                            const classes = isLast ? 'p-4' : 'p-4 border-b border-blue-gray-50';
-
-                            return (
-                                <tr key={code}>
-                                    <td className={classes}>
-                                        <Typography variant="small" color="blue-gray" className="font-normal uppercase">
-                                            {code}
-                                        </Typography>
-                                    </td>
-                                    <td className={`${classes} capitalize`}>{type}</td>
-                                    <td className={classes}>
-                                        {discount}
-                                        {type == 'coupon' ? '%' : '$'}
-                                    </td>
-                                    <td className={classes}>
-                                        <Typography variant="small" color="blue-gray" className="font-normal">
-                                            {new Date(startDate).toLocaleDateString('vi-VN')}
-                                        </Typography>
-                                    </td>
-                                    <td className={classes}>
-                                        <Typography variant="small" color="blue-gray" className="font-normal">
-                                            {new Date(endDate).toLocaleDateString('vi-VN')}
-                                        </Typography>
-                                    </td>
-                                    <td className={classes}>
-                                        <Typography variant="small" color="blue-gray" className="font-normal">
-                                            {currentUses}/{maxUsage}
-                                        </Typography>
-                                    </td>
-                                    <td className={classes}>
-                                        <Switch
-                                            defaultChecked={active}
-                                            onChange={(e) => handleActiveProduct(e, _id)}
-                                            color="green"
-                                            name="active"
-                                        />
-                                    </td>
-                                    <td className={classes}>
-                                        <div className="flex items-center gap-2">
-                                            <Tooltip content="Edit promo code">
-                                                <IconButton
-                                                    variant="text"
-                                                    onClick={(e) => {
-                                                        const ip = e.currentTarget.nextElementSibling;
-                                                        ip.checked = !ip.checked;
-                                                    }}
-                                                >
-                                                    <PencilIcon className="size-4" />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <EditPromoCode promoCode={promoCode} setPromoCodes={setPromoCodes} />
-                                            <Tooltip content="Delete promo code">
-                                                <IconButton
-                                                    variant="text"
-                                                    className="hover:text-red-500"
-                                                    onClick={(e) => {
-                                                        const ip = e.currentTarget.nextElementSibling;
-                                                        ip.checked = !ip.checked;
-                                                    }}
-                                                >
-                                                    <TrashIcon className="size-4" />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <DeletePromoCode id={_id} code={code} setPromoCodes={setPromoCodes} />
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </Card> */}
-            <div
-                className="ag-theme-quartz mt-4" // applying the grid theme
-                style={{ height: 500 }}
-            >
+            <div className="ag-theme-quartz mt-4" style={{ height: 500 }}>
                 <AgGridReact
                     ref={tableGrid}
                     rowData={promoCodes}
                     columnDefs={[
-                        { field: 'code', headerName: 'Code', flex: 1.5 },
+                        {
+                            field: 'code',
+                            headerName: 'Code',
+                            flex: 1.5,
+                            cellClass: 'cursor-pointer',
+                            onCellDoubleClicked: (e) => {
+                                if (!navigator.clipboard) {
+                                    return;
+                                }
+                                navigator.clipboard.writeText(e.value).then(
+                                    function () {
+                                        toast.success('Copying to clipboard was successful!', { icon: '🗿' });
+                                    },
+                                    function (err) {
+                                        toast.error('Async: Could not copy text: ', err);
+                                    },
+                                );
+                            },
+                        },
                         {
                             field: 'type',
                             headerName: 'Type',

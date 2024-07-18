@@ -10,7 +10,7 @@ import DatePicker from 'react-datepicker';
 import moment from 'moment';
 
 const ORDER_STATUS = [
-    { status: 'pending', color: 'orange' },
+    { status: 'pending', color: '#FFDE4D' },
     { status: 'completed', color: '#06D001' },
     { status: 'failed', color: '#FF3838' },
     { status: 'processing', color: '#2DCCFF' },
@@ -157,12 +157,16 @@ const Order = () => {
                             field: 'orderStatus',
                             headerName: 'Order Status',
                             cellClass: 'capitalize',
+                            flex: 1.2,
                             cellRenderer: ({ data }) => {
                                 return (
                                     <span
                                         style={{
-                                            color: ORDER_STATUS.find((ot) => ot.status == data.orderStatus).color,
+                                            color: 'black',
+                                            background:
+                                                ORDER_STATUS.find((ot) => ot.status == data.orderStatus).color + '80',
                                         }}
+                                        className="rounded-md px-2 py-1 !text-xs"
                                     >
                                         {data.orderStatus}
                                     </span>

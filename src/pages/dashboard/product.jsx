@@ -78,7 +78,7 @@ export function Product() {
             </div>
             <div
                 className="ag-theme-quartz mt-4" // applying the grid theme
-                style={{ height: 500 }} // the grid will fill the size of the parent container
+                style={{ height: 850 }} // the grid will fill the size of the parent container
             >
                 <AgGridReact
                     ref={tableGrid}
@@ -170,8 +170,8 @@ export function Product() {
                         },
                     ]}
                     pagination={true}
-                    paginationPageSize={5}
-                    paginationPageSizeSelector={[5, 10, 15, 20]}
+                    paginationPageSize={10}
+                    paginationPageSizeSelector={[10, 15, 20, 25]}
                     className="pb-5"
                     defaultColDef={{
                         autoHeight: true,

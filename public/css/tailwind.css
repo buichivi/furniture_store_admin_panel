@@ -82,3 +82,9 @@ html {
 .react-datepicker-wrapper {
     width: 100%;
 }
+
+/* Apex chart tooltip */
+.apexcharts-tooltip-title {
+    /* background: #000;
+    color: #fff; */
+}
