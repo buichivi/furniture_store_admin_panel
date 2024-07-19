@@ -110,15 +110,15 @@ const RevenueStatisticsChart = ({ data = {} }) => {
 
     return (
         <Card className="border border-blue-gray-100 p-4 shadow-sm">
-            <div className="flex items-center justify-between px-5 pt-2">
-                <h3 className="font-semibold text-black">Revenue</h3>
+            <h3 className="text-center font-semibold text-black">Revenue Statistics</h3>
+            <div className="flex items-center justify-between pt-2">
                 <div className="flex flex-1 items-center justify-end gap-4">
                     {Object.keys(monthlyData)?.length > 0 && selectedType == 'monthly' && (
                         <Autocomplete
                             multiple
                             options={Object.keys(monthlyData)?.sort((a, b) => a - b)}
                             size="small"
-                            className="w-auto min-w-[30%] max-w-[50%] !text-sm"
+                            className="max-w-[50%] flex-1 !text-sm"
                             value={selectedYears}
                             getOptionLabel={(op) => op}
                             onChange={(_, value) => {
@@ -153,69 +153,71 @@ const RevenueStatisticsChart = ({ data = {} }) => {
                             />
                         </div>
                     )}
-                    <div className="flex items-center justify-around gap-1 rounded-md bg-gray-100 p-1 text-sm *:cursor-pointer *:rounded-md *:px-2 *:py-1 *:text-gray-500">
-                        {['daily', 'monthly', 'yearly'].map((type) => {
-                            return (
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center justify-around gap-1 rounded-md bg-gray-100 p-1 text-sm *:cursor-pointer *:rounded-md *:px-2 *:py-1 *:text-gray-500">
+                            {['daily', 'monthly', 'yearly'].map((type) => {
+                                return (
+                                    <span
+                                        key={type}
+                                        className={`capitalize ${
+                                            selectedType == type && 'bg-white !text-black'
+                                        } transition-all`}
+                                        onClick={() => setSelectedType(type)}
+                                    >
+                                        {type}
+                                    </span>
+                                );
+                            })}
+                        </div>
+                        <div className="flex items-center gap-2 rounded-md bg-gray-100 p-1 *:cursor-pointer *:rounded-md *:p-1 *:text-gray-500">
+                            <Tooltip content="Area chart">
                                 <span
-                                    key={type}
-                                    className={`capitalize ${
-                                        selectedType == type && 'bg-white !text-black'
-                                    } transition-all`}
-                                    onClick={() => setSelectedType(type)}
+                                    className={`${chartType == 'area' && 'bg-white !text-black'}`}
+                                    onClick={() => setChartType('area')}
                                 >
-                                    {type}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <path d="M3 3v18h18" />
+                                        <path d="M7 12v5h12V8l-5 5-4-4Z" />
+                                    </svg>
                                 </span>
-                            );
-                        })}
-                    </div>
-                    <div className="flex items-center gap-2 rounded-md bg-gray-100 p-1 *:cursor-pointer *:rounded-md *:p-1 *:text-gray-500">
-                        <Tooltip content="Area chart">
-                            <span
-                                className={`${chartType == 'area' && 'bg-white !text-black'}`}
-                                onClick={() => setChartType('area')}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.5"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
+                            </Tooltip>
+                            <Tooltip content="Bar chart">
+                                <span
+                                    className={`${chartType == 'bar' && 'bg-white !text-black'}`}
+                                    onClick={() => setChartType('bar')}
                                 >
-                                    <path d="M3 3v18h18" />
-                                    <path d="M7 12v5h12V8l-5 5-4-4Z" />
-                                </svg>
-                            </span>
-                        </Tooltip>
-                        <Tooltip content="Bar chart">
-                            <span
-                                className={`${chartType == 'bar' && 'bg-white !text-black'}`}
-                                onClick={() => setChartType('bar')}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.5"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                >
-                                    <path d="M3 3v18h18" />
-                                    <rect width="4" height="7" x="7" y="10" rx="1" />
-                                    <rect width="4" height="12" x="15" y="5" rx="1" />
-                                </svg>
-                            </span>
-                        </Tooltip>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="20"
+                                        height="20"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <path d="M3 3v18h18" />
+                                        <rect width="4" height="7" x="7" y="10" rx="1" />
+                                        <rect width="4" height="12" x="15" y="5" rx="1" />
+                                    </svg>
+                                </span>
+                            </Tooltip>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div className="mt-10 h-[300px] px-4">
+            <div className="mt-10 h-[300px]">
                 {selectedType == 'daily' && (
                     <>
                         {chartType == 'area' && dailyFilteredData.length > 0 && (

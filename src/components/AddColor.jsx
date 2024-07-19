@@ -13,6 +13,7 @@ const AddColor = () => {
     const { slug } = useParams();
     const navigate = useNavigate();
     const { token } = useAuthStore();
+    const [model, setModel] = useState();
 
     const addColorForm = useFormik({
         initialValues: {
@@ -20,12 +21,14 @@ const AddColor = () => {
             thumb: '',
             stock: 0,
             images: [],
+            model3D: '',
         },
         validationSchema: Yup.object({
             name: Yup.string().required('This field is required'),
             thumb: Yup.mixed().required('This field is required'),
             stock: Yup.number().min(0).required('This field is required'),
             images: Yup.array().min(1).required('This field is required'),
+            model3D: Yup.mixed(),
         }),
         onSubmit: (values) => {
             const formData = new FormData();
@@ -83,20 +86,25 @@ const AddColor = () => {
 
     return (
         <div className="py-6">
-            <div className="flex items-center gap-2">
-                <Link to={`/dashboard/product/edit/${slug}`}>
-                    <Tooltip content="Back">
-                        <IconButton>
-                            <ArrowLeftIcon className="size-4" />
-                        </IconButton>
-                    </Tooltip>
-                </Link>
-                <h3 className="text-xl">Add color</h3>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Link to={`/dashboard/product/edit/${slug}`}>
+                        <Tooltip content="Back">
+                            <IconButton>
+                                <ArrowLeftIcon className="size-4" />
+                            </IconButton>
+                        </Tooltip>
+                    </Link>
+                    <h3 className="text-xl">Add color</h3>
+                </div>
+                <Button type="submit" className="mt-4" onClick={addColorForm.handleSubmit}>
+                    Add color
+                </Button>
             </div>
             <form onSubmit={addColorForm.handleSubmit} className="mt-4">
                 <div className="flex gap-4">
                     <Card className="flex-1 p-4">
-                        <div className="mt-4">
+                        <div className="">
                             <div className="flex items-center justify-between">
                                 <span className="block text-sm font-medium">Name</span>
                                 {addColorForm.errors.name && (
@@ -208,9 +216,70 @@ const AddColor = () => {
                         </div>
                     </Card>
                 </div>
-                <Button type="submit" className="mt-4">
-                    Add color
-                </Button>
+                <Card className="mt-4 p-4">
+                    <div className="flex items-center justify-between">
+                        <span className="block text-sm font-medium">Model 3D</span>
+                    </div>
+
+                    <div className="mt-2 size-[400px] overflow-hidden rounded-md border">
+                        {!model ? (
+                            <label
+                                htmlFor="upload-3d-model"
+                                className="flex size-full cursor-pointer items-center justify-center bg-gray-200 text-sm text-gray-400 transition-colors duration-500 hover:bg-gray-400 hover:text-black"
+                            >
+                                <div className="flex flex-col items-center">
+                                    <CloudArrowUpIcon className="size-8" />
+                                    <p>Upload your model here</p>
+                                </div>
+                            </label>
+                        ) : (
+                            <model-viewer
+                                src={model}
+                                ar
+                                shadow-intensity="1"
+                                camera-controls
+                                auto-rotate
+                                camera-orbit="0deg 90deg 5m"
+                                touch-action="pan-y"
+                                style={{ width: '100%', height: '100%' }}
+                            ></model-viewer>
+                        )}
+                    </div>
+                    {model && (
+                        <div className="mt-4 flex items-center gap-6 text-sm">
+                            <Button
+                                size="sm"
+                                className="normal-case"
+                                variant="outlined"
+                                onClick={(e) => e.currentTarget.parentElement.nextElementSibling.click()}
+                            >
+                                Change model
+                            </Button>
+                            <Button
+                                color="red"
+                                size="sm"
+                                className="normal-case"
+                                onClick={(e) => {
+                                    setModel();
+                                    e.currentTarget.parentElement.nextElementSibling.value = '';
+                                }}
+                            >
+                                Remove
+                            </Button>
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        id="upload-3d-model"
+                        className="hidden"
+                        accept=".gltf,.glb"
+                        onChange={(e) => {
+                            const modelUrl = URL.createObjectURL(e.currentTarget.files[0]);
+                            addColorForm.setFieldValue('model3D', e.currentTarget.files[0]);
+                            setModel(modelUrl);
+                        }}
+                    />
+                </Card>
             </form>
         </div>
     );

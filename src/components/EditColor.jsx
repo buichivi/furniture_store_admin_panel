@@ -4,7 +4,8 @@ import { ArrowLeftIcon, CloudArrowUpIcon, PencilIcon, Square2StackIcon } from '@
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { Button, Card, IconButton, Tooltip } from '@material-tailwind/react';
 import { useFormik } from 'formik';
-import React, { useEffect, useState } from 'react';
+import { doc } from 'prettier';
+import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
@@ -14,13 +15,22 @@ const EditColor = () => {
     const { slug, colorId } = useParams();
     const navigate = useNavigate();
     const { token } = useAuthStore();
+    const [model, setModel] = useState();
+    const modelViewerRef = useRef();
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         apiRequest
             .get('/colors/' + colorId)
             .then((res) => setColor(res.data.color))
             .catch((err) => console.log(err));
-    }, []);
+    }, [colorId]);
+
+    useEffect(() => {
+        if (color?.model3D) {
+            setModel(color?.model3D);
+        }
+    }, [color]);
 
     const editColorForm = useFormik({
         initialValues: {
@@ -29,6 +39,8 @@ const EditColor = () => {
             stock: color?.stock || 0,
             images: [],
             existedImages: color?.images || [],
+            model3D: '',
+            isDeleteModel: false,
         },
         enableReinitialize: true,
         validationSchema: Yup.object({
@@ -36,6 +48,8 @@ const EditColor = () => {
             thumb: Yup.mixed(),
             stock: Yup.number().min(0).required('This field is required'),
             images: Yup.array(),
+            model3D: Yup.mixed(),
+            isDeleteModel: Yup.bool(),
         }),
         onSubmit: (values) => {
             const formData = new FormData();
@@ -76,6 +90,33 @@ const EditColor = () => {
             );
         },
     });
+
+    useEffect(() => {
+        if (!model) {
+            editColorForm.setFieldValue('isDeleteModel', true);
+        }
+    }, [model]);
+
+    useEffect(() => {
+        const modelViewer = document.querySelector('model-viewer');
+        const onProgress = (e) => {
+            const progressBar = modelViewer.querySelector('#progress-bar');
+            if (e.detail.totalProgress == 1) {
+                progressBar.classList.add('hidden');
+            } else progressBar.classList.remove('hidden');
+        };
+
+        if (modelViewer) {
+            modelViewer.addEventListener('progress', onProgress);
+        }
+        return () => {
+            if (modelViewer) {
+                modelViewer.removeEventListener('progress', onProgress);
+            }
+        };
+    }, [model]);
+
+    console.log(isLoading);
 
     const ImageProduct = ({ src = '', index = 0, type = '' }) => {
         return (
@@ -133,7 +174,7 @@ const EditColor = () => {
             <div className="mt-4">
                 <div className="flex gap-4">
                     <Card className="flex-1 p-4">
-                        <div className="mt-4">
+                        <div className="">
                             <div className="flex items-center justify-between">
                                 <span className="block text-sm font-medium">Name</span>
                                 {editColorForm.errors.name && (
@@ -253,6 +294,118 @@ const EditColor = () => {
                         </div>
                     </Card>
                 </div>
+                <Card className="mt-4 p-4">
+                    <div className="flex items-center justify-between">
+                        <span className="block text-sm font-medium">Model 3D</span>
+                    </div>
+
+                    <div className="mt-2 size-[400px] overflow-hidden rounded-md border">
+                        {!model ? (
+                            <label
+                                htmlFor="upload-3d-model"
+                                className="flex size-full cursor-pointer items-center justify-center bg-gray-200 text-sm text-gray-400 transition-colors duration-500 hover:bg-gray-400 hover:text-black"
+                            >
+                                <div className="flex flex-col items-center">
+                                    <CloudArrowUpIcon className="size-8" />
+                                    <p>Upload your model here</p>
+                                </div>
+                            </label>
+                        ) : (
+                            <model-viewer
+                                src={model}
+                                poster={color?.images?.length && color.images[0]}
+                                ar
+                                shadow-intensity="1"
+                                camera-controls
+                                auto-rotate
+                                camera-orbit="0deg 90deg 5m"
+                                touch-action="pan-y"
+                                crossorigin="anonymous"
+                                style={{ width: '100%', height: '100%', backgroudColor: '#fefefe' }}
+                            >
+                                <div
+                                    slot="progress-bar"
+                                    id="progress-bar"
+                                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24">
+                                        <g stroke="black">
+                                            <circle
+                                                cx="12"
+                                                cy="12"
+                                                r="9.5"
+                                                fill="none"
+                                                strokeLinecap="round"
+                                                strokeWidth="3"
+                                            >
+                                                <animate
+                                                    attributeName="stroke-dasharray"
+                                                    calcMode="spline"
+                                                    dur="1.5s"
+                                                    keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1"
+                                                    keyTimes="0;0.475;0.95;1"
+                                                    repeatCount="indefinite"
+                                                    values="0 150;42 150;42 150;42 150"
+                                                />
+                                                <animate
+                                                    attributeName="stroke-dashoffset"
+                                                    calcMode="spline"
+                                                    dur="1.5s"
+                                                    keySplines="0.42,0,0.58,1;0.42,0,0.58,1;0.42,0,0.58,1"
+                                                    keyTimes="0;0.475;0.95;1"
+                                                    repeatCount="indefinite"
+                                                    values="0;-16;-59;-59"
+                                                />
+                                            </circle>
+                                            <animateTransform
+                                                attributeName="transform"
+                                                dur="2s"
+                                                repeatCount="indefinite"
+                                                type="rotate"
+                                                values="0 12 12;360 12 12"
+                                            />
+                                        </g>
+                                    </svg>
+                                </div>
+                            </model-viewer>
+                        )}
+                    </div>
+                    {model && (
+                        <div className="mt-4 flex items-center gap-6 text-sm">
+                            <Button
+                                size="sm"
+                                className="normal-case"
+                                variant="outlined"
+                                onClick={(e) => e.currentTarget.parentElement.nextElementSibling.click()}
+                            >
+                                Change model
+                            </Button>
+                            <Button
+                                color="red"
+                                size="sm"
+                                className="normal-case"
+                                onClick={(e) => {
+                                    setModel();
+                                    e.currentTarget.parentElement.nextElementSibling.value = '';
+                                }}
+                            >
+                                Remove
+                            </Button>
+                        </div>
+                    )}
+                    <input
+                        type="file"
+                        id="upload-3d-model"
+                        className="hidden"
+                        accept=".gltf,.glb"
+                        onChange={(e) => {
+                            const modelUrl = URL.createObjectURL(e.currentTarget.files[0]);
+                            editColorForm.setFieldValue('model3D', e.currentTarget.files[0]);
+                            console.log(modelUrl);
+                            setModel(modelUrl);
+                        }}
+                    />
+                </Card>
             </div>
         </form>
     );

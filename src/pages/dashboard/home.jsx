@@ -63,7 +63,7 @@ export function Home() {
 
         orders.forEach((order) => {
             if (
-                order.orderStatus == 'completed' &&
+                (order.orderStatus == 'completed' || order.paymentStatus == 'paid') &&
                 new Date(order.updatedAt).getMonth() + 1 == currentMonth - 1 &&
                 new Date(order.updatedAt).getUTCFullYear() == currentYear
             ) {
@@ -71,7 +71,7 @@ export function Home() {
                 prevMonthRevenue += order.totalAmount;
             }
             if (
-                order.orderStatus == 'completed' &&
+                (order.orderStatus == 'completed' || order.paymentStatus == 'paid') &&
                 new Date(order.updatedAt).getMonth() + 1 == currentMonth &&
                 new Date(order.updatedAt).getUTCFullYear() == currentYear
             ) {
@@ -95,8 +95,12 @@ export function Home() {
             }
         });
 
-        const diffRatioRevenue = Number((thisMonthRevenue / prevMonthRevenue) * 100).toFixed(2);
-        const diffRatioTotalOrder = Number((totalOrderThisMonth / totalOrderLastMonth) * 100).toFixed(2);
+        const diffRatioRevenue = Number(
+            (prevMonthRevenue ? thisMonthRevenue / prevMonthRevenue : thisMonthRevenue) * 100,
+        ).toFixed(2);
+        const diffRatioTotalOrder = Number(
+            (totalOrderLastMonth ? totalOrderThisMonth / totalOrderLastMonth : totalOrderThisMonth) * 100,
+        ).toFixed(2);
         const diffRatioTotalCustomer = Number((totalCustomerThisMonth / totalCustomerPrevMonth) * 100).toFixed(2);
 
         return [
