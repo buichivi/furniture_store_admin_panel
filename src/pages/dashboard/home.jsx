@@ -29,12 +29,46 @@ import {
 } from '@heroicons/react/24/solid';
 import useAuthStore from '@/stores/authStore';
 import apiRequest from '@/utils/apiRequest';
+import useCategoryStore from '@/stores/categoryStore';
+import ReactApexChart from 'react-apexcharts';
+import { Link } from 'react-router-dom';
+
+const getCategoryTree = (categories) => {
+    const categoryMap = {};
+    categories.forEach((cate) => (categoryMap[cate._id] = { ...cate, child: [] }));
+
+    const categoryTree = [];
+    categories.forEach((cate) => {
+        if (cate.parentId === '') {
+            categoryTree.push(categoryMap[cate._id]);
+        } else {
+            categoryMap[cate.parentId]?.child.push(categoryMap[cate._id]);
+        }
+    });
+    return categoryTree;
+};
+
+function buildParentMap(tree, parentMap = {}, parent = null) {
+    tree.forEach((node) => {
+        parentMap[node._id] = parent || node._id;
+        if (node.child && node.child.length > 0) {
+            buildParentMap(node.child, parentMap, parent || node._id);
+        }
+    });
+    return parentMap;
+}
 
 export function Home() {
     const [orders, setOrders] = useState([]);
     const [users, setUsers] = useState([]);
     const [revenueData, setRevenueData] = useState({});
     const { token } = useAuthStore();
+    const { categories, setCategories } = useCategoryStore();
+    const [revenueByCategory, setRevenueByCategory] = useState([]);
+
+    const categoryTree = useMemo(() => {
+        return getCategoryTree(categories);
+    }, [categories]);
 
     useEffect(() => {
         apiRequest
@@ -46,9 +80,49 @@ export function Home() {
                 setRevenueData(statisticsData);
             })
             .catch((err) => console.log(err));
+        apiRequest
+            .get('/categories')
+            .then((res) => setCategories(res.data.categories))
+            .catch((err) => console.log(err));
     }, []);
 
-    console.log(revenueData);
+    useEffect(() => {
+        console.log(categoryTree, revenueData?.revenueByCategory);
+        if (categoryTree.length && revenueData?.revenueByCategory) {
+            const parentMap = buildParentMap(categoryTree);
+
+            const revenueByParentCategory = revenueData.revenueByCategory.reduce((acc, item) => {
+                const parentCategoryId = parentMap[item.categoryId];
+                if (!acc[parentCategoryId]) {
+                    acc[parentCategoryId] = { totalRevenue: 0, categoryId: parentCategoryId, categoryName: '' };
+                }
+                acc[parentCategoryId].totalRevenue += item.totalRevenue;
+                return acc;
+            }, {});
+
+            const parentCategoryNames = categoryTree.reduce((acc, item) => {
+                acc[item._id] = item.name;
+                return acc;
+            }, {});
+
+            Object.keys(revenueByParentCategory).forEach((key) => {
+                revenueByParentCategory[key].categoryName = parentCategoryNames[key];
+            });
+
+            categoryTree.forEach((parentCategory) => {
+                if (!revenueByParentCategory[parentCategory._id]) {
+                    revenueByParentCategory[parentCategory._id] = {
+                        totalRevenue: 0,
+                        categoryId: parentCategory._id,
+                        categoryName: parentCategory.name,
+                    };
+                }
+            });
+
+            const result = Object.values(revenueByParentCategory);
+            setRevenueByCategory(result);
+        }
+    }, [categoryTree, revenueData]);
 
     const statisticsCardsData = useMemo(() => {
         const currentMonth = new Date().getMonth() + 1;
@@ -149,6 +223,8 @@ export function Home() {
         ];
     }, [orders, users]);
 
+    console.log(revenueByCategory);
+
     return (
         <div className="">
             <div className="mb-4 grid gap-x-4 gap-y-10 md:grid-cols-2 xl:grid-cols-3">
@@ -175,9 +251,11 @@ export function Home() {
                 ))}
             </div>
             <div className="mt-4 grid grid-cols-3 gap-4">
-                <div className="col-span-2">
+                <div className="col-span-3">
                     <RevenueStatisticsChart data={revenueData} />
                 </div>
+            </div>
+            <div className="mt-4 grid h-[400px] grid-cols-2 gap-4">
                 <Card className="border border-blue-gray-100 p-4">
                     <h3 className="text-base font-bold text-black">Top Products</h3>
                     <div className="mt-4 flex flex-col">
@@ -188,19 +266,22 @@ export function Home() {
                         <div className="max-h-[300px] flex-1 overflow-y-auto [scrollbar-width:thin]">
                             {revenueData?.topProducts?.map((item) => {
                                 return (
-                                    <div key={item.prod} className="mt-2 grid grid-cols-4 gap-2">
-                                        <div className="col-span-3 flex items-center gap-2">
-                                            <div className="w-14 shrink-0 overflow-hidden rounded-md border border-blue-gray-100 p-1">
-                                                <img
-                                                    src={item.productImage}
-                                                    alt={item.product}
-                                                    className="size-full object-cover"
-                                                />
-                                            </div>
-                                            <Tooltip content={item.product}>
+                                    <div key={item.product} className="mt-2 grid grid-cols-4 gap-2">
+                                        <Tooltip content={item.product}>
+                                            <Link
+                                                to={`/dashboard/product/edit/${item.slug}`}
+                                                className="col-span-3 flex items-center gap-2"
+                                            >
+                                                <div className="w-14 shrink-0 overflow-hidden rounded-md border border-blue-gray-100 p-1">
+                                                    <img
+                                                        src={item.productImage}
+                                                        alt={item.product}
+                                                        className="size-full object-cover"
+                                                    />
+                                                </div>
                                                 <span className="line-clamp-1 text-sm">{item.product}</span>
-                                            </Tooltip>
-                                        </div>
+                                            </Link>
+                                        </Tooltip>
                                         <span className="flex items-center justify-center font-semibold text-black">
                                             {item.sold}
                                         </span>
@@ -208,6 +289,28 @@ export function Home() {
                                 );
                             })}
                         </div>
+                    </div>
+                </Card>
+                <Card className="border border-blue-gray-100 p-4">
+                    <h3 className="text-base font-bold capitalize text-black">Group by category</h3>
+                    <div className="mt-4">
+                        <ReactApexChart
+                            options={{
+                                chart: {
+                                    height: 400,
+                                },
+                                labels: revenueByCategory.map((item) => item.categoryName),
+                                tooltip: {
+                                    y: {
+                                        formatter: function (val) {
+                                            return '$' + val;
+                                        },
+                                    },
+                                },
+                            }}
+                            series={revenueByCategory.map((item) => item.totalRevenue)}
+                            type="donut"
+                        />
                     </div>
                 </Card>
             </div>

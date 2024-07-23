@@ -7,7 +7,45 @@ import { Avatar, Button, Card, IconButton, Switch, Tooltip } from '@material-tai
 import { AgGridReact } from 'ag-grid-react';
 import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+const handleActiveProduct = (e, id) => {
+    toast.promise(
+        apiRequest.patch(
+            '/products/' + id,
+            { active: e.target.checked },
+            { headers: { Authorization: 'Bearer ' + token } },
+        ),
+        {
+            loading: 'Updating...',
+            success: (res) => {
+                return res.data.message;
+            },
+            error: (err) => {
+                return err.response.data.error || 'Something went wrong';
+            },
+        },
+    );
+};
+
+const handleDeleteProduct = (e, id) => {
+    toast.promise(apiRequest.delete('/products/' + id, { headers: { Authorization: 'Bearer ' + token } }), {
+        loading: 'Deleting...',
+        success: (res) => {
+            setProducts((products) => products.filter((prod) => prod._id != id));
+
+            // ! Handle when delete a product close modal
+            return res.data.message;
+        },
+        error: (err) => {
+            return err.response.data.error || 'Something went wrong';
+        },
+    });
+};
+
+const onRowDoubleClicked = (event, navigate) => {
+    navigate(`/dashboard/product/edit/${event.data?.slug}`);
+};
 
 export function Product() {
     const [products, setProducts] = useState([]);
@@ -15,6 +53,7 @@ export function Product() {
     const [deleteProduct, setDeteleProduct] = useState({});
     const [isDelete, setIsDelete] = useState(false);
     const tableGrid = useRef();
+    const navigate = useNavigate();
 
     useEffect(() => {
         apiRequest
@@ -25,40 +64,6 @@ export function Product() {
             })
             .catch((error) => console.log(error));
     }, []);
-
-    const handleActiveProduct = (e, id) => {
-        toast.promise(
-            apiRequest.patch(
-                '/products/' + id,
-                { active: e.target.checked },
-                { headers: { Authorization: 'Bearer ' + token } },
-            ),
-            {
-                loading: 'Updating...',
-                success: (res) => {
-                    return res.data.message;
-                },
-                error: (err) => {
-                    return err.response.data.error || 'Something went wrong';
-                },
-            },
-        );
-    };
-
-    const handleDeleteProduct = (e, id) => {
-        toast.promise(apiRequest.delete('/products/' + id, { headers: { Authorization: 'Bearer ' + token } }), {
-            loading: 'Deleting...',
-            success: (res) => {
-                setProducts((products) => products.filter((prod) => prod._id != id));
-
-                // ! Handle when delete a product close modal
-                return res.data.message;
-            },
-            error: (err) => {
-                return err.response.data.error || 'Something went wrong';
-            },
-        });
-    };
 
     return (
         <div className="py-6">
@@ -108,13 +113,17 @@ export function Product() {
                             cellRenderer: ({ data }) => {
                                 return (
                                     <>
-                                        {data?.colors.map(({ name, thumb }, key) => (
+                                        {data?.colors.map(({ _id, name, thumb }, key) => (
                                             <Tooltip key={key} content={name} className="capitalize">
                                                 <Avatar
                                                     src={thumb}
                                                     size="xs"
                                                     variant="circular"
                                                     className={`cursor-pointer ${key === 0 ? '' : '-ml-2.5'}`}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        navigate(`/dashboard/product/${data.slug}/edit-color/${_id}`);
+                                                    }}
                                                 />
                                             </Tooltip>
                                         ))}
@@ -135,6 +144,7 @@ export function Product() {
                                         onChange={(e) => handleActiveProduct(e, data._id)}
                                         color="green"
                                         name="active"
+                                        className="flex-1"
                                     />
                                 );
                             },
@@ -177,6 +187,8 @@ export function Product() {
                         autoHeight: true,
                         flex: 1,
                     }}
+                    rowClass="cursor-pointer"
+                    onRowDoubleClicked={(e) => onRowDoubleClicked(e, navigate)}
                 />
             </div>
             {isDelete && (

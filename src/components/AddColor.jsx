@@ -42,7 +42,7 @@ const AddColor = () => {
                 formData.append(key, values[key]);
             }
             toast.promise(
-                apiRequest.post('/colors/' + slug, formData, {
+                apiRequest.post('products/colors/' + slug, formData, {
                     headers: {
                         Authorization: `Bearer ` + token,
                     },

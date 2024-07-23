@@ -16,12 +16,10 @@ const EditColor = () => {
     const navigate = useNavigate();
     const { token } = useAuthStore();
     const [model, setModel] = useState();
-    const modelViewerRef = useRef();
-    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         apiRequest
-            .get('/colors/' + colorId)
+            .get('/products/colors/' + slug + '/' + colorId)
             .then((res) => setColor(res.data.color))
             .catch((err) => console.log(err));
     }, [colorId]);
@@ -70,7 +68,7 @@ const EditColor = () => {
                 formData.append(key, values[key]);
             }
             toast.promise(
-                apiRequest.put('/colors/' + colorId, formData, {
+                apiRequest.put('/products/colors/' + slug + '/' + colorId, formData, {
                     headers: {
                         Authorization: `Bearer ` + token,
                     },
@@ -115,8 +113,6 @@ const EditColor = () => {
             }
         };
     }, [model]);
-
-    console.log(isLoading);
 
     const ImageProduct = ({ src = '', index = 0, type = '' }) => {
         return (

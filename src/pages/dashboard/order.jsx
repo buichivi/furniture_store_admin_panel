@@ -145,6 +145,7 @@ const Order = () => {
                             valueFormatter: ({ data }) => {
                                 return moment(data.createdAt).format('DD/MM/YYYY HH:mm');
                             },
+                            flex: 1.3,
                         },
                         {
                             field: 'totalAmount',

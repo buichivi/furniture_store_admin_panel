@@ -1,9 +1,7 @@
 import { Card, Tooltip } from '@material-tailwind/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import Chart from 'react-apexcharts';
-import ApexCharts from 'apexcharts';
 import { Autocomplete, TextField } from '@mui/material';
-import moment from 'moment';
 import DatePicker from 'react-datepicker';
 
 const formatData = (years, data) => {
@@ -230,6 +228,7 @@ const RevenueStatisticsChart = ({ data = {} }) => {
                                         labels: {
                                             rotate: 0,
                                         },
+                                        tickAmount: 10,
                                     },
                                 }}
                                 series={[
@@ -252,6 +251,7 @@ const RevenueStatisticsChart = ({ data = {} }) => {
                                         labels: {
                                             rotate: 0,
                                         },
+                                        stickAmount: 10,
                                     },
                                 }}
                                 series={[

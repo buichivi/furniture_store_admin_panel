@@ -97,10 +97,13 @@ const EditOrder = () => {
                             className="w-full rounded-md border-2 p-2 text-sm capitalize transition-colors focus:border-black"
                             name="orderStatus"
                             value={orderInfoForm.values.orderStatus}
-                            onChange={orderInfoForm.handleChange}
+                            onChange={(e) => {
+                                orderInfoForm.handleChange(e);
+                                orderInfoForm.setFieldValue('paymentStatus', 'paid');
+                            }}
                             disabled={order?.orderStatus == 'completed' || order?.orderStatus == 'cancelled'}
                         >
-                            {['pending', 'failed', 'processing', 'shipping', 'delivered', 'cancelled', 'completed'].map(
+                            {['pending', 'processing', 'shipping', 'delivered', 'cancelled', 'completed'].map(
                                 (status) => {
                                     return (
                                         <option key={status} value={status} className="capitalize">
@@ -221,7 +224,7 @@ const ShippingAddress = ({ form, order }) => {
                         name="firstName"
                         value={form.values.firstName}
                         onChange={form.handleChange}
-                        disabled={form.values.orderStatus == 'completed'}
+                        disabled={form.values.orderStatus == 'completed' || form.values.orderStatus == 'cancelled'}
                     />
                     {form.errors.firstName && (
                         <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.firstName}</span>
@@ -235,7 +238,7 @@ const ShippingAddress = ({ form, order }) => {
                         name="lastName"
                         value={form.values.lastName}
                         onChange={form.handleChange}
-                        disabled={form.values.orderStatus == 'completed'}
+                        disabled={form.values.orderStatus == 'completed' || form.values.orderStatus == 'cancelled'}
                     />
                     {form.errors.lastName && (
                         <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.lastName}</span>
@@ -252,7 +255,7 @@ const ShippingAddress = ({ form, order }) => {
                         name="email"
                         value={form.values.email}
                         onChange={form.handleChange}
-                        disabled={form.values.orderStatus == 'completed'}
+                        disabled={form.values.orderStatus == 'completed' || form.values.orderStatus == 'cancelled'}
                     />
                     {form.errors.email && (
                         <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.email}</span>
@@ -267,7 +270,7 @@ const ShippingAddress = ({ form, order }) => {
                         name="phoneNumber"
                         value={form.values.phoneNumber}
                         onChange={form.handleChange}
-                        disabled={form.values.orderStatus == 'completed'}
+                        disabled={form.values.orderStatus == 'completed' || form.values.orderStatus == 'cancelled'}
                     />
                     {form.errors.phoneNumber && (
                         <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.phoneNumber}</span>
@@ -284,7 +287,7 @@ const ShippingAddress = ({ form, order }) => {
                         form.setFieldValue('city', city);
                     }}
                     className="w-full rounded-md border-2 p-2 text-sm transition-colors focus:border-black"
-                    disabled={form.values.orderStatus == 'completed'}
+                    disabled={form.values.orderStatus == 'completed' || form.values.orderStatus == 'cancelled'}
                 >
                     {cities.map((city) => {
                         return (
@@ -309,7 +312,7 @@ const ShippingAddress = ({ form, order }) => {
                             form.setFieldValue('district', district);
                         }}
                         className="w-full rounded-md border-2 p-2 text-sm transition-colors focus:border-black"
-                        disabled={form.values.orderStatus == 'completed'}
+                        disabled={form.values.orderStatus == 'completed' || form.values.orderStatus == 'cancelled'}
                     >
                         <option value="">Select district</option>
                         {districts.map((district) => {
@@ -333,7 +336,7 @@ const ShippingAddress = ({ form, order }) => {
                             const ward = wards.find((ward) => ward.id == e.currentTarget.value);
                             form.setFieldValue('ward', ward);
                         }}
-                        disabled={form.values.orderStatus == 'completed'}
+                        disabled={form.values.orderStatus == 'completed' || form.values.orderStatus == 'cancelled'}
                         className="w-full rounded-md border-2 p-2 text-sm transition-colors focus:border-black"
                     >
                         <option value="">Select ward</option>
@@ -358,7 +361,7 @@ const ShippingAddress = ({ form, order }) => {
                     name="addressLine"
                     value={form.values.addressLine}
                     onChange={form.handleChange}
-                    disabled={form.values.orderStatus == 'completed'}
+                    disabled={form.values.orderStatus == 'completed' || form.values.orderStatus == 'cancelled'}
                 />
                 {form.errors.addressLine && (
                     <span className="absolute bottom-0 left-0 text-sm text-red-400">{form.errors.addressLine}</span>
