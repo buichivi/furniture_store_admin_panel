@@ -33,8 +33,6 @@ const handleDeleteProduct = (e, id) => {
         loading: 'Deleting...',
         success: (res) => {
             setProducts((products) => products.filter((prod) => prod._id != id));
-
-            // ! Handle when delete a product close modal
             return res.data.message;
         },
         error: (err) => {
@@ -59,8 +57,8 @@ export function Product() {
         apiRequest
             .get('/products')
             .then((res) => {
-                console.log(res.data.products);
-                setProducts(res.data.products);
+                const sortedProducts = res.data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                setProducts(sortedProducts);
             })
             .catch((error) => console.log(error));
     }, []);

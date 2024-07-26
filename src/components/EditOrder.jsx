@@ -99,7 +99,7 @@ const EditOrder = () => {
                             value={orderInfoForm.values.orderStatus}
                             onChange={(e) => {
                                 orderInfoForm.handleChange(e);
-                                if (e.value == 'completed') {
+                                if (e.currentTarget.value == 'completed') {
                                     orderInfoForm.setFieldValue('paymentStatus', 'paid');
                                 }
                             }}
