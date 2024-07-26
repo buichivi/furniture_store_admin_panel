@@ -37,7 +37,8 @@ const EditPromoCode = ({ promoCode, setPromoCodes, setIsEdit }) => {
                         schema.positive('Discount must be a positive number').integer('Discount must be an integer'),
                 }),
             startDate: Yup.date()
-                .min(promoCode?.startDate, 'Start date cannot be in the past')
+                // .min(promoCode?.startDate, 'Start date cannot be in the past')
+                // .min(new Date(), 'Start date cannot be in the past')
                 .required('This field is required'),
             endDate: Yup.date()
                 .required('This field is required')

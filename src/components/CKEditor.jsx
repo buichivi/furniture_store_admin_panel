@@ -45,9 +45,7 @@ const Editor = ({ initialValue = '', onChange }) => {
 
     useEffect(() => {
         const listSrc = Array.from(
-            new DOMParser()
-                .parseFromString(editor?.getData(), 'text/html')
-                .querySelectorAll('img'),
+            new DOMParser().parseFromString(editor?.getData(), 'text/html').querySelectorAll('img'),
         )
             .map((img) => img.getAttribute('src'))
             .filter((item) => item != null);
@@ -61,9 +59,7 @@ const Editor = ({ initialValue = '', onChange }) => {
 
     useEffect(() => {
         const listSrc = Array.from(
-            new DOMParser()
-                .parseFromString(editor?.getData(), 'text/html')
-                .querySelectorAll('img'),
+            new DOMParser().parseFromString(editor?.getData(), 'text/html').querySelectorAll('img'),
         )
             .map((img) => img.getAttribute('src'))
             .filter((item) => item != null);
@@ -148,7 +144,7 @@ const Editor = ({ initialValue = '', onChange }) => {
                 ],
                 simpleUpload: {
                     // The URL that the images are uploaded to.
-                    uploadUrl: `${import.meta.env.VITE_BASE_URL}/blogs/images`,
+                    uploadUrl: `${import.meta.env.VITE_SERVER_URL}/api/blogs/images`,
 
                     // Enable the XMLHttpRequest.withCredentials property.
                     withCredentials: true,
@@ -189,11 +185,7 @@ const Editor = ({ initialValue = '', onChange }) => {
                         {
                             name: 'imageStyle:customDropdown',
                             title: 'Image align',
-                            items: [
-                                'imageStyle:alignLeft',
-                                'imageStyle:alignCenter',
-                                'imageStyle:alignRight',
-                            ],
+                            items: ['imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight'],
                             defaultItem: 'imageStyle:alignLeft',
                         },
                         'resizeImage',

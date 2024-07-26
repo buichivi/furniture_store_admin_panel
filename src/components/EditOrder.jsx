@@ -99,7 +99,9 @@ const EditOrder = () => {
                             value={orderInfoForm.values.orderStatus}
                             onChange={(e) => {
                                 orderInfoForm.handleChange(e);
-                                orderInfoForm.setFieldValue('paymentStatus', 'paid');
+                                if (e.value == 'completed') {
+                                    orderInfoForm.setFieldValue('paymentStatus', 'paid');
+                                }
                             }}
                             disabled={order?.orderStatus == 'completed' || order?.orderStatus == 'cancelled'}
                         >
@@ -163,6 +165,18 @@ const EditOrder = () => {
                             <span>Total: </span>
                             <span className="mt-6 inline-block text-xl font-bold text-black">
                                 ${order?.totalAmount}
+                            </span>
+                        </div>
+                        <div>
+                            <span>Payment: </span>
+                            <span className="mt-2 inline-block text-lg font-bold uppercase text-black">
+                                {order?.paymentMethod}
+                            </span>
+                        </div>
+                        <div>
+                            <span>Payment status: </span>
+                            <span className="mt-2 inline-block text-lg font-bold capitalize text-black">
+                                {order?.paymentStatus}
                             </span>
                         </div>
                     </div>
