@@ -19,9 +19,6 @@
 -   **Brands, Tags, Blogs, Slider Management**: Add, update and delete brands, tags, blogs, slider.
 
 ## Installation
-
-Clone the repository:
-
 ```bash
 git clone https://github.com/buichivi/furniture_store_admin_panel.git
 cd furniture_store_admin_panel
