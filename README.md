@@ -1,7 +1,7 @@
 # Furniture Store Admin panel
 
 -   Admin Panel This repository contains the admin panel for the Furniture Store application. The admin panel allows for managing products, orders, categories, brands, tags, ...
-
+- Test account: admin@gmail.com | 123456
 ## Tech Stack
 
 -   [ReactJS](https://react.dev/): JavaScript library for building user interfaces.
