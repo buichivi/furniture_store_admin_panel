@@ -10,3 +10,4 @@ export * from '@/pages/dashboard/promocode';
 export * from '@/pages/dashboard/tag';
 export * from '@/pages/dashboard/sliderandbanner';
 export * from '@/pages/dashboard/blog';
+export * from '@/pages/dashboard/room';

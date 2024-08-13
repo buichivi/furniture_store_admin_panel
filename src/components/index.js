@@ -11,3 +11,4 @@ export { default as EditOrder } from './EditOrder';
 export { default as EditSliderForm } from './EditSlider';
 export { default as AddBlog } from './AddBlog';
 export { default as CKEditor } from './CKEditor';
+export { default as EditRoom } from './EditRoom';

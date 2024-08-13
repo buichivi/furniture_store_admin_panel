@@ -25,9 +25,20 @@ import {
     Blog,
 } from '@/pages/dashboard';
 import { SignIn, SignUp } from '@/pages/auth';
-import { AddBlog, AddColor, AddProduct, EditCategoryForm, EditColor, EditOrder, EditProductForm } from './components';
+import {
+    AddBlog,
+    AddColor,
+    AddProduct,
+    EditCategoryForm,
+    EditColor,
+    EditOrder,
+    EditProductForm,
+    EditRoom,
+} from './components';
 import { element } from 'prop-types';
 import Order from './pages/dashboard/order';
+import Room from './pages/dashboard/room';
+import { CameraIcon } from '@heroicons/react/24/outline';
 
 const icon = {
     className: 'w-5 h-5 text-inherit',
@@ -66,6 +77,12 @@ export const routes = [
                 name: 'product',
                 path: '/product',
                 element: <Product />,
+            },
+            {
+                icon: <CameraIcon {...icon} />,
+                name: 'room',
+                path: '/room',
+                element: <Room />,
             },
             {
                 icon: <TicketIcon {...icon} />,
@@ -133,6 +150,10 @@ const subRoutes = [
     {
         path: '/product/create',
         element: <AddProduct />,
+    },
+    {
+        path: '/room/edit/:slug',
+        element: <EditRoom />,
     },
     {
         path: '/product/edit/:slug/add-color',
